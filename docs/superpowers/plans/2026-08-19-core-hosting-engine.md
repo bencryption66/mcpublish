@@ -876,7 +876,7 @@ RSpec.describe "MCP tools/call", type: :request do
   let!(:other_key_pair) { ApiKey.issue!(label: "Bob") }
   let(:other_api_key) { other_key_pair.first }
 
-  def call_tool(name, arguments, token: token, id: 1)
+  def call_tool(name, arguments, token: self.token, id: 1)
     post "/mcp",
       params: { jsonrpc: "2.0", id: id, method: "tools/call", params: { name: name, arguments: arguments } }.to_json,
       headers: { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer #{token}" }
@@ -1176,7 +1176,7 @@ In `app/controllers/mcp_controller.rb`, replace the `handle_tools_call` method:
 - [ ] **Step 9: Run the spec to verify it passes**
 
 Run: `bundle exec rspec spec/requests/mcp_tools_call_spec.rb`
-Expected: PASS (11 examples)
+Expected: PASS (10 examples)
 
 - [ ] **Step 10: Run the full suite to check for regressions**
 
