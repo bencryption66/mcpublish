@@ -1,4 +1,6 @@
 class ApiKey < ApplicationRecord
+  has_many :artifacts, dependent: :destroy
+
   TOKEN_PREFIX = "mcpub_".freeze
 
   validates :label, presence: true
