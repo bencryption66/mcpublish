@@ -121,4 +121,19 @@ RSpec.describe "MCP tools/call", type: :request do
       expect(Artifact.find_by(slug: slug)).not_to be_nil
     end
   end
+
+  describe "unexpected errors" do
+    it "returns a generic isError result instead of a raw 500" do
+      allow(Mcp::ToolDispatcher).to receive(:call).and_raise(RuntimeError, "boom")
+
+      post "/mcp",
+        params: { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "publish_artifact", arguments: { html: "<html>x</html>" } } }.to_json,
+        headers: { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer #{token}" }
+
+      expect(response).to have_http_status(:ok)
+      result = JSON.parse(response.body)
+      expect(result["result"]["isError"]).to eq(true)
+      expect(result["result"]["content"].first["text"]).to eq("Internal error, please retry")
+    end
+  end
 end

@@ -46,6 +46,9 @@ class McpController < ApplicationController
     render json: success_response(result)
   rescue Mcp::ToolDispatcher::ToolError => e
     render json: success_response({ content: [{ type: "text", text: e.message }], isError: true })
+  rescue StandardError => e
+    Rails.logger.error("Unexpected error in tools/call: #{e.class}: #{e.message}")
+    render json: success_response({ content: [{ type: "text", text: "Internal error, please retry" }], isError: true })
   end
 
   def success_response(result)
