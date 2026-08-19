@@ -4,7 +4,7 @@ class McpController < ApplicationController
   PROTOCOL_VERSION = "2025-06-18".freeze
 
   def create
-    case params[:method]
+    case payload["method"]
     when "initialize"
       render json: success_response(initialize_result)
     when "tools/list"
@@ -12,11 +12,19 @@ class McpController < ApplicationController
     when "tools/call"
       handle_tools_call
     else
-      render json: error_response(-32601, "Method not found: #{params[:method]}")
+      render json: error_response(-32601, "Method not found: #{payload["method"]}")
     end
   end
 
   private
+
+  def payload
+    @payload ||= begin
+      JSON.parse(request.raw_post)
+    rescue JSON::ParserError
+      {}
+    end
+  end
 
   def initialize_result
     {
@@ -31,8 +39,8 @@ class McpController < ApplicationController
   end
 
   def handle_tools_call
-    tool_name = params.dig(:params, :name)
-    arguments = params.dig(:params, :arguments)&.to_unsafe_h || {}
+    tool_name = payload.dig("params", "name")
+    arguments = payload.dig("params", "arguments") || {}
 
     result = Mcp::ToolDispatcher.call(tool_name: tool_name, arguments: arguments, api_key: current_api_key)
     render json: success_response(result)
@@ -41,10 +49,10 @@ class McpController < ApplicationController
   end
 
   def success_response(result)
-    { jsonrpc: "2.0", id: params[:id], result: result }
+    { jsonrpc: "2.0", id: payload["id"], result: result }
   end
 
   def error_response(code, message)
-    { jsonrpc: "2.0", id: params[:id], error: { code: code, message: message } }
+    { jsonrpc: "2.0", id: payload["id"], error: { code: code, message: message } }
   end
 end

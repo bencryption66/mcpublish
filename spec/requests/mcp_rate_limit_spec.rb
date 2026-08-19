@@ -23,4 +23,16 @@ RSpec.describe "MCP rate limiting", type: :request do
     35.times { call_tool("list_artifacts", {}) }
     expect(response).not_to have_http_status(:too_many_requests)
   end
+
+  it "does not dispatch based on query-string params, only the parsed JSON body" do
+    post "/mcp?method=tools/call&params[name]=publish_artifact&params[arguments][html]=<html>x</html>",
+      params: "{}",
+      headers: { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer #{token}" }
+
+    json = JSON.parse(response.body)
+
+    expect(json["error"]).to be_present
+    expect(json["error"]["message"]).to match(/Method not found/)
+    expect(Artifact.count).to eq(0)
+  end
 end
