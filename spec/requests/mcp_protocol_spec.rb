@@ -51,4 +51,10 @@ RSpec.describe "MCP protocol", type: :request do
     body = JSON.parse(response.body)
     expect(body["error"]["code"]).to eq(-32601)
   end
+
+  it "is not routable on the content subdomain" do
+    host! "content.mcpublish.ai"
+    post_mcp({ jsonrpc: "2.0", id: 1, method: "initialize" }, token: token)
+    expect(response).to have_http_status(:not_found)
+  end
 end
