@@ -8,7 +8,7 @@ class Artifact < ApplicationRecord
   before_validation :assign_slug, on: :create
 
   def url
-    "https://content.mcpublish.ai/p/#{slug}"
+    "https://#{Rails.application.config.x.content_host}/p/#{slug}"
   end
 
   private
