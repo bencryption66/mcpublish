@@ -256,7 +256,7 @@ end
 - [ ] **Step 6: Run the spec to verify it passes**
 
 Run: `bundle exec rspec spec/models/api_key_spec.rb`
-Expected: PASS (7 examples)
+Expected: PASS (8 examples)
 
 - [ ] **Step 7: Add the manual issuance rake task**
 
