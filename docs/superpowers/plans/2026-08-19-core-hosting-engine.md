@@ -25,7 +25,7 @@
 ## Task 1: Rails App Scaffold
 
 **Files:**
-- Create: entire Rails app skeleton (via `rails new`), in `/Users/dfitzgibbon/Projects/mcpublish`
+- Create: entire Rails app skeleton (via `rails new`), in the current project root
 - Modify: `Gemfile`
 - Test: `spec/requests/health_spec.rb`
 
@@ -34,7 +34,7 @@
 
 - [ ] **Step 1: Generate the Rails app**
 
-Run from `/Users/dfitzgibbon/Projects/mcpublish` (the directory already contains `docs/` and an initialized git repo — `rails new .` will detect the existing `.git` and skip re-initializing it):
+Run from your current project root — i.e. wherever this `docs/` directory and the git repo live (a worktree checkout, if you're working in one; do not run this in any other checkout of the same repo). `rails new .` will detect the existing `.git` and skip re-initializing it:
 
 ```bash
 rails new . --api --database=postgresql --skip-test
