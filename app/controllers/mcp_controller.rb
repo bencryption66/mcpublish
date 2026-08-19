@@ -31,7 +31,13 @@ class McpController < ApplicationController
   end
 
   def handle_tools_call
-    render json: error_response(-32601, "tools/call not yet implemented")
+    tool_name = params.dig(:params, :name)
+    arguments = params.dig(:params, :arguments)&.to_unsafe_h || {}
+
+    result = Mcp::ToolDispatcher.call(tool_name: tool_name, arguments: arguments, api_key: current_api_key)
+    render json: success_response(result)
+  rescue Mcp::ToolDispatcher::ToolError => e
+    render json: success_response({ content: [{ type: "text", text: e.message }], isError: true })
   end
 
   def success_response(result)
