@@ -107,5 +107,18 @@ RSpec.describe "MCP tools/call", type: :request do
       expect(not_owned["result"]["content"]).to eq(not_found["result"]["content"])
       expect(Artifact.exists?(other_artifact.id)).to eq(true)
     end
+
+    it "surfaces an S3 failure as a retryable error and does not destroy the record" do
+      publish_result = call_tool("publish_artifact", { html: "<html>bye</html>" })
+      slug = publish_result["result"]["slug"]
+
+      allow(ArtifactStorage).to receive(:delete).and_raise(Aws::S3::Errors::ServiceError.new(nil, "boom"))
+
+      result = call_tool("delete_artifact", { slug: slug })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(result["result"]["content"].first["text"]).to match(/retry/i)
+      expect(Artifact.find_by(slug: slug)).not_to be_nil
+    end
   end
 end

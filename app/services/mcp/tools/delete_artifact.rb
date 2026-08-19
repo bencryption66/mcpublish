@@ -14,7 +14,12 @@ module Mcp
         artifact = @api_key.artifacts.find_by(slug: @slug)
         raise ToolDispatcher::ToolError, NOT_FOUND_MESSAGE unless artifact
 
-        ArtifactStorage.delete(storage_key: artifact.storage_key)
+        begin
+          ArtifactStorage.delete(storage_key: artifact.storage_key)
+        rescue Aws::Errors::ServiceError, Seahorse::Client::NetworkingError => e
+          raise ToolDispatcher::ToolError, "Storage error, please retry: #{e.message}"
+        end
+
         artifact.destroy!
 
         { content: [{ type: "text", text: "Deleted #{@slug}" }], success: true }

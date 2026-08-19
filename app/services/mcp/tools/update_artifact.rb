@@ -22,7 +22,7 @@ module Mcp
 
         begin
           ArtifactStorage.put(storage_key: artifact.storage_key, content: @html)
-        rescue Aws::S3::Errors::ServiceError => e
+        rescue Aws::Errors::ServiceError, Seahorse::Client::NetworkingError => e
           raise ToolDispatcher::ToolError, "Storage error, please retry: #{e.message}"
         end
 
