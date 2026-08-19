@@ -9,4 +9,8 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   post "/mcp", to: "mcp#create"
+
+  constraints(subdomain: "content") do
+    get "/p/:slug", to: "content#show"
+  end
 end
