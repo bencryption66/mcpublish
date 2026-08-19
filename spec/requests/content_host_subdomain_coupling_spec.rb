@@ -45,4 +45,31 @@ RSpec.describe "Content host / route host coupling", type: :request do
       Rails.application.reload_routes!
     end
   end
+
+  it "normalizes host comparison for case and a trailing dot so /mcp can't silently reopen on the content host" do
+    api_key = ApiKey.issue!(label: "Bob").first
+    artifact = Artifact.create!(api_key: api_key, storage_key: "artifacts/1", byte_size: 20)
+    ArtifactStorage.client.stub_responses(:get_object, body: "<html>hi</html>")
+
+    # A case-mismatched variant of the content host: the comparison must
+    # normalize case, or this fails open and re-exposes /mcp here.
+    host! "CONTENT.mcpublish.ai"
+    get "/p/#{artifact.slug}"
+    expect(response).to have_http_status(:ok)
+
+    post "/mcp", params: { jsonrpc: "2.0", id: 1, method: "initialize" }.to_json,
+                 headers: { "CONTENT_TYPE" => "application/json" }
+    expect(response).to have_http_status(:not_found)
+
+    # A trailing-dot variant (browsers treat this as the same host; raw
+    # string equality does not): the comparison must strip it, or this
+    # fails open and re-exposes /mcp here too.
+    host! "content.mcpublish.ai."
+    get "/p/#{artifact.slug}"
+    expect(response).to have_http_status(:ok)
+
+    post "/mcp", params: { jsonrpc: "2.0", id: 1, method: "initialize" }.to_json,
+                 headers: { "CONTENT_TYPE" => "application/json" }
+    expect(response).to have_http_status(:not_found)
+  end
 end
