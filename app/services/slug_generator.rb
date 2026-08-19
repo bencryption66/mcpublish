@@ -13,6 +13,6 @@ class SlugGenerator
   end
 
   def self.candidate
-    Array.new(LENGTH) { ALPHABET.sample }.join
+    Array.new(LENGTH) { ALPHABET[SecureRandom.random_number(ALPHABET.size)] }.join
   end
 end

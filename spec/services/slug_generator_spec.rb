@@ -17,4 +17,12 @@ RSpec.describe SlugGenerator do
       expect(SlugGenerator.generate_unique).to eq("freshone1")
     end
   end
+
+  describe ".candidate" do
+    it "draws characters from a cryptographically secure source, not Array#sample" do
+      expect(SecureRandom).to receive(:random_number).at_least(:once).and_call_original
+
+      SlugGenerator.candidate
+    end
+  end
 end
