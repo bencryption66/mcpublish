@@ -1250,7 +1250,8 @@ RSpec.describe "Content serving", type: :request do
 
   it "is not routable on the main app host" do
     host! "mcpublish.ai"
-    expect { get "/p/#{artifact.slug}" }.to raise_error(ActionController::RoutingError)
+    get "/p/#{artifact.slug}"
+    expect(response).to have_http_status(:not_found)
   end
 end
 ```
