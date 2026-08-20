@@ -13,7 +13,9 @@ class UsersController < WebController
 
     session[:user_id] = @user.id
     redirect_to account_path, notice: "Account created"
-  rescue ActiveRecord::RecordInvalid
+  rescue ActiveRecord::RecordInvalid => e
+    raise unless e.record.is_a?(User) && e.record == @user
+
     render :new, status: :unprocessable_entity
   end
 

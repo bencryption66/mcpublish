@@ -35,6 +35,7 @@ RSpec.describe "Signup", type: :request do
 
     post "/signup", params: { user: { email: "broken@example.com", password: "password123", password_confirmation: "password123" } }
 
+    expect(response).to have_http_status(:unprocessable_entity)
     expect(User.exists?(email: "broken@example.com")).to eq(false)
   end
 end
