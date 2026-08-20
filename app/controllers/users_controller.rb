@@ -6,13 +6,15 @@ class UsersController < WebController
   def create
     @user = User.new(user_params)
 
-    if @user.save
+    ActiveRecord::Base.transaction do
+      @user.save!
       claim_pending_invites(@user)
-      session[:user_id] = @user.id
-      redirect_to account_path, notice: "Account created"
-    else
-      render :new, status: :unprocessable_entity
     end
+
+    session[:user_id] = @user.id
+    redirect_to account_path, notice: "Account created"
+  rescue ActiveRecord::RecordInvalid
+    render :new, status: :unprocessable_entity
   end
 
   private

@@ -26,4 +26,15 @@ RSpec.describe "Signup", type: :request do
     expect(user.organizations).to include(organization)
     expect(OrganizationInvite.exists?(organization: organization, email: "invited@example.com")).to eq(false)
   end
+
+  it "rolls back the whole signup if claiming an invite fails" do
+    organization = Organization.create!(name: "Acme", slug: "acme")
+    OrganizationInvite.create!(organization: organization, email: "broken@example.com")
+
+    allow(OrganizationMembership).to receive(:create!).and_raise(ActiveRecord::RecordInvalid.new(OrganizationMembership.new))
+
+    post "/signup", params: { user: { email: "broken@example.com", password: "password123", password_confirmation: "password123" } }
+
+    expect(User.exists?(email: "broken@example.com")).to eq(false)
+  end
 end
