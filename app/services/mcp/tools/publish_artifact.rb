@@ -28,7 +28,7 @@ module Mcp
           raise ToolDispatcher::ToolError, "Storage error, please retry: #{e.message}"
         end
 
-        { content: [{ type: "text", text: artifact.url }], slug: artifact.slug, url: artifact.url }
+        { content: [ { type: "text", text: artifact.url } ], slug: artifact.slug, url: artifact.url }
       end
     end
   end

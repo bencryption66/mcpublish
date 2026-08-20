@@ -16,7 +16,7 @@ module Mcp
           }
         end
 
-        { content: [{ type: "text", text: "#{artifacts.size} artifact(s)" }], artifacts: artifacts }
+        { content: [ { type: "text", text: "#{artifacts.size} artifact(s)" } ], artifacts: artifacts }
       end
     end
   end

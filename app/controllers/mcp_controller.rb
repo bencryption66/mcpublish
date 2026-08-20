@@ -19,11 +19,12 @@ class McpController < ApplicationController
   private
 
   def payload
-    @payload ||= begin
-      JSON.parse(request.raw_post)
-    rescue JSON::ParserError
-      {}
-    end
+    return @payload if defined?(@payload)
+
+    parsed = JSON.parse(request.raw_post)
+    @payload = parsed.is_a?(Hash) ? parsed : {}
+  rescue JSON::ParserError
+    @payload = {}
   end
 
   def initialize_result
@@ -45,10 +46,10 @@ class McpController < ApplicationController
     result = Mcp::ToolDispatcher.call(tool_name: tool_name, arguments: arguments, api_key: current_api_key)
     render json: success_response(result)
   rescue Mcp::ToolDispatcher::ToolError => e
-    render json: success_response({ content: [{ type: "text", text: e.message }], isError: true })
+    render json: success_response({ content: [ { type: "text", text: e.message } ], isError: true })
   rescue StandardError => e
     Rails.logger.error("Unexpected error in tools/call: #{e.class}: #{e.message}")
-    render json: success_response({ content: [{ type: "text", text: "Internal error, please retry" }], isError: true })
+    render json: success_response({ content: [ { type: "text", text: "Internal error, please retry" } ], isError: true })
   end
 
   def success_response(result)

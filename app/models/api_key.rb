@@ -9,7 +9,7 @@ class ApiKey < ApplicationRecord
   def self.issue!(label:)
     raw_token = TOKEN_PREFIX + SecureRandom.hex(32)
     api_key = create!(label: label, token_digest: digest(raw_token))
-    [api_key, raw_token]
+    [ api_key, raw_token ]
   end
 
   def self.authenticate(raw_token)

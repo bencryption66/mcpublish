@@ -22,7 +22,7 @@ module Mcp
 
         artifact.destroy!
 
-        { content: [{ type: "text", text: "Deleted #{@slug}" }], success: true }
+        { content: [ { type: "text", text: "Deleted #{@slug}" } ], success: true }
       end
     end
   end

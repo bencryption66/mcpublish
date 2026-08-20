@@ -57,12 +57,16 @@ This spec covers sub-project 1 only.
   since this is a remote hosted server rather than a local stdio process) at
   `POST /mcp`. This origin will later also host the dashboard and accounts
   (sub-projects 2 and 4).
-- **`content.mcpublish.ai`** — same Rails codebase, routed via a subdomain
-  constraint to a dedicated controller that serves only artifact HTML. This
-  controller never loads the session/cookie middleware, so the origin
-  genuinely cannot read the main app's session — isolation is enforced
-  structurally (middleware never runs for this route), not just by
-  convention.
+- **`content.mcpublish.ai`** — same Rails codebase, routed via a host
+  constraint to a dedicated controller that serves only artifact HTML. Rack
+  middleware is global — it cannot be scoped to a single route — so the real
+  guarantee is at the controller layer: this controller inherits
+  `ActionController::API` directly, never `ApplicationController`, so it
+  never includes `ActionController::Cookies` and structurally cannot read or
+  set cookies regardless of what middleware the main app later loads (e.g.
+  sessions in sub-project 2). Combined with a host-scoped session cookie (see
+  the caveat below), the browser has no session cookie to send here even if
+  it wanted to.
 - **Postgres** holds metadata (API keys, artifact records). **S3** holds the
   actual HTML bytes, keyed by artifact id. Keeping content out of the DB
   keeps it small and lets multi-file sites be added later as just more S3

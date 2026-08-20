@@ -9,7 +9,7 @@ module Mcp
           properties: {
             html: { type: "string", description: "Self-contained HTML content to publish." }
           },
-          required: ["html"]
+          required: [ "html" ]
         }
       },
       {
@@ -37,7 +37,7 @@ module Mcp
           properties: {
             slug: { type: "string", description: "The slug of the artifact to delete." }
           },
-          required: ["slug"]
+          required: [ "slug" ]
         }
       }
     ].freeze

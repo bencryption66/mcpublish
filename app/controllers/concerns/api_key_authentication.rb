@@ -14,19 +14,23 @@ module ApiKeyAuthentication
 
   def bearer_token
     header = request.headers["Authorization"]
-    return nil unless header&.start_with?("Bearer ")
+    return nil unless header&.match?(/\ABearer /i)
 
-    header.delete_prefix("Bearer ")
+    header.sub(/\ABearer /i, "")
   end
 
   def current_api_key
     @current_api_key
   end
 
+  # Relies on the including controller defining a private `payload` method
+  # (parsed JSON body) — true of every controller that currently includes
+  # this concern (McpController). A future includer without one would need
+  # to add it or override this method.
   def render_unauthorized
     render json: {
       jsonrpc: "2.0",
-      id: params[:id],
+      id: payload["id"],
       error: { code: -32001, message: "Unauthorized: missing or invalid API key" }
     }, status: :unauthorized
   end

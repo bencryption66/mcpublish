@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
 
-  content_host = Rails.application.config.x.content_host.to_s.downcase.delete_suffix(".")
+  content_host = Rails.application.config.x.content_host
   on_content_host = ->(req) { req.host.to_s.downcase.delete_suffix(".") == content_host }
 
   constraints(on_content_host) do
