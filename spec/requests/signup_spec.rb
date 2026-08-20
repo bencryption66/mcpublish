@@ -1,0 +1,18 @@
+require "rails_helper"
+
+RSpec.describe "Signup", type: :request do
+  it "creates a user and signs them in" do
+    post "/signup", params: { user: { email: "new@example.com", password: "password123", password_confirmation: "password123" } }
+
+    expect(response).to redirect_to("/account")
+    follow_redirect!
+    expect(response.body).to include("new@example.com")
+  end
+
+  it "re-renders the form with errors on invalid input" do
+    post "/signup", params: { user: { email: "not-an-email", password: "short", password_confirmation: "short" } }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(User.count).to eq(0)
+  end
+end
