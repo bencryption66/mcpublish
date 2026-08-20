@@ -1,5 +1,7 @@
 class User < ApplicationRecord
   has_many :api_keys, dependent: :destroy
+  has_many :organization_memberships, dependent: :destroy
+  has_many :organizations, through: :organization_memberships
   has_secure_password
 
   before_validation :normalize_email
