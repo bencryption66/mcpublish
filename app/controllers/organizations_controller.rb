@@ -46,8 +46,20 @@ class OrganizationsController < WebController
   def remove_member
     organization = admin_organization(params[:id])
     membership = organization.organization_memberships.find(params[:membership_id])
+
+    if membership.admin? && organization.organization_memberships.where(role: "admin").count <= 1
+      redirect_to organization_path(organization), alert: "Cannot remove the last admin"
+      return
+    end
+
+    removing_self = membership.user == current_user
     membership.destroy!
-    redirect_to organization_path(organization), notice: "Member removed"
+
+    if removing_self
+      redirect_to organizations_path, notice: "You left #{organization.name}"
+    else
+      redirect_to organization_path(organization), notice: "Member removed"
+    end
   end
 
   private

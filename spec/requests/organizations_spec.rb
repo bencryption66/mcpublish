@@ -67,4 +67,26 @@ RSpec.describe "Organizations", type: :request do
     expect(response).to have_http_status(:not_found)
     expect(OrganizationMembership.exists?(membership.id)).to eq(true)
   end
+
+  it "does not let the last admin remove themselves" do
+    sign_in_as(admin)
+    organization = Organization.create!(name: "Acme", slug: "acme")
+    admin_membership = OrganizationMembership.create!(user: admin, organization: organization, role: "admin")
+
+    delete "/organizations/#{organization.id}/members/#{admin_membership.id}"
+
+    expect(OrganizationMembership.exists?(admin_membership.id)).to eq(true)
+  end
+
+  it "redirects to the organizations list when an admin removes themselves from an org with other admins left" do
+    sign_in_as(admin)
+    organization = Organization.create!(name: "Acme", slug: "acme")
+    admin_membership = OrganizationMembership.create!(user: admin, organization: organization, role: "admin")
+    OrganizationMembership.create!(user: member, organization: organization, role: "admin")
+
+    delete "/organizations/#{organization.id}/members/#{admin_membership.id}"
+
+    expect(response).to redirect_to("/organizations")
+    expect(OrganizationMembership.exists?(admin_membership.id)).to eq(false)
+  end
 end
