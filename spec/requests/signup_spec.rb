@@ -15,4 +15,15 @@ RSpec.describe "Signup", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
     expect(User.count).to eq(0)
   end
+
+  it "claims any pending organization invites matching the new user's email" do
+    organization = Organization.create!(name: "Acme", slug: "acme")
+    OrganizationInvite.create!(organization: organization, email: "invited@example.com")
+
+    post "/signup", params: { user: { email: "invited@example.com", password: "password123", password_confirmation: "password123" } }
+
+    user = User.find_by!(email: "invited@example.com")
+    expect(user.organizations).to include(organization)
+    expect(OrganizationInvite.exists?(organization: organization, email: "invited@example.com")).to eq(false)
+  end
 end
