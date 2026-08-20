@@ -136,8 +136,13 @@ auth, not passed as a tool argument).
 `GET content.mcpublish.ai/p/:slug`:
 
 - Looks up the artifact by slug, streams the HTML from S3.
-- Response headers: `Content-Type: text/html`, no `Set-Cookie`. No session
-  store is active on this subdomain's routes at all.
+- Response headers: `Content-Type: text/html`, no `Set-Cookie`. Session/cookie
+  middleware is present globally in the Rack stack (it has to be, to support
+  the web UI added in sub-project 4), so it is no longer accurate to say no
+  session store is active on this subdomain's routes. What actually backs
+  the isolation claim now: `ApplicationController` and `ContentController`
+  both override `session` to raise immediately if it is ever called, making
+  touching it a hard failure rather than a silent possibility.
 - No long-lived caching — content can change via `update_artifact`, so
   responses are served fresh each time (no `Cache-Control: immutable` or
   long-TTL caching).

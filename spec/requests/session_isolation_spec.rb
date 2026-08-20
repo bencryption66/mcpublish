@@ -21,4 +21,12 @@ RSpec.describe "Session middleware does not leak into API-only hosts", type: :re
 
     expect(response.headers["Set-Cookie"]).to be_nil
   end
+
+  it "raises if McpController's session is ever accessed" do
+    expect { McpController.new.send(:session) }.to raise_error(/must never access the session/)
+  end
+
+  it "raises if ContentController's session is ever accessed" do
+    expect { ContentController.new.send(:session) }.to raise_error(/must never access the session/)
+  end
 end
