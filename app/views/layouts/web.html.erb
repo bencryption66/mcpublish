@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>mcpublish</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+  </head>
+  <body>
+    <% flash.each do |type, message| %>
+      <p role="alert"><%= message %></p>
+    <% end %>
+    <%= yield %>
+  </body>
+</html>

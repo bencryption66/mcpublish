@@ -40,5 +40,15 @@ module CoreHostingEngine
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # config.api_only stays true — most of the app (McpController,
+    # ContentController) needs no session at all. These two middlewares add
+    # session/cookie support to the Rack stack for the controllers that
+    # explicitly opt in (WebController subclasses, via ActionController::Base).
+    # ActionController::API subclasses never include the Cookies/Session
+    # modules regardless of middleware presence, so this cannot leak into
+    # McpController or ContentController — see spec/requests/session_isolation_spec.rb.
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore, key: "_mcpublish_session"
   end
 end
