@@ -6,6 +6,7 @@ class SessionsController < WebController
     user = User.find_by(email: params[:email].to_s.strip.downcase)
 
     if user&.authenticate(params[:password])
+      reset_session
       session[:user_id] = user.id
       redirect_to account_path, notice: "Signed in"
     else
@@ -15,7 +16,7 @@ class SessionsController < WebController
   end
 
   def destroy
-    session.delete(:user_id)
+    reset_session
     redirect_to login_path, notice: "Signed out"
   end
 end

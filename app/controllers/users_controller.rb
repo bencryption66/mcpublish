@@ -11,6 +11,7 @@ class UsersController < WebController
       claim_pending_invites(@user)
     end
 
+    reset_session
     session[:user_id] = @user.id
     redirect_to account_path, notice: "Account created"
   rescue ActiveRecord::RecordInvalid => e
