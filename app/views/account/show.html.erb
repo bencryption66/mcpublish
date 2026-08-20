@@ -1,3 +1,4 @@
 <h1>Account</h1>
 <p>Signed in as <%= current_user.email %></p>
+<p><%= link_to "API keys", api_keys_path %></p>
 <%= button_to "Log out", logout_path, method: :delete %>

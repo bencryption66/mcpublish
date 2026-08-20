@@ -1,0 +1,20 @@
+<h1>API keys</h1>
+
+<ul>
+  <% @api_keys.each do |api_key| %>
+    <li>
+      <%= api_key.label %>
+      <% if api_key.revoked? %>
+        (revoked)
+      <% else %>
+        <%= button_to "Revoke", api_key_path(api_key), method: :delete %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>
+
+<%= form_with url: api_keys_path, local: true do |f| %>
+  <%= f.label :label, "New key label" %>
+  <%= f.text_field :label %>
+  <%= f.submit "Generate key" %>
+<% end %>

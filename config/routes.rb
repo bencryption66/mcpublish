@@ -27,5 +27,6 @@ Rails.application.routes.draw do
     post "/login", to: "sessions#create"
     delete "/logout", to: "sessions#destroy", as: :logout
     get "/account", to: "account#show", as: :account
+    resources :api_keys, only: [ :index, :create, :destroy ]
   end
 end
