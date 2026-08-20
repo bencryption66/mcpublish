@@ -1,4 +1,5 @@
 class ApiKey < ApplicationRecord
+  belongs_to :user, optional: true
   has_many :artifacts, dependent: :destroy
 
   TOKEN_PREFIX = "mcpub_".freeze
@@ -6,9 +7,9 @@ class ApiKey < ApplicationRecord
   validates :label, presence: true
   validates :token_digest, presence: true, uniqueness: true
 
-  def self.issue!(label:)
+  def self.issue!(label:, user: nil)
     raw_token = TOKEN_PREFIX + SecureRandom.hex(32)
-    api_key = create!(label: label, token_digest: digest(raw_token))
+    api_key = create!(label: label, user: user, token_digest: digest(raw_token))
     [ api_key, raw_token ]
   end
 

@@ -15,6 +15,19 @@ RSpec.describe ApiKey, type: :model do
 
       expect(api_key.token_digest).not_to eq(raw_token)
     end
+
+    it "associates the key with a user when one is given" do
+      user = User.create!(email: "eve@example.com", password: "password123", password_confirmation: "password123")
+      api_key, = ApiKey.issue!(label: "Eve's key", user: user)
+
+      expect(api_key.user).to eq(user)
+      expect(user.api_keys).to include(api_key)
+    end
+
+    it "still works with no user (backward compatible with existing manual-issuance callers)" do
+      api_key, = ApiKey.issue!(label: "Ownerless")
+      expect(api_key.user).to be_nil
+    end
   end
 
   describe ".authenticate" do
