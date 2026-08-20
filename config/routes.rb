@@ -28,5 +28,11 @@ Rails.application.routes.draw do
     delete "/logout", to: "sessions#destroy", as: :logout
     get "/account", to: "account#show", as: :account
     resources :api_keys, only: [ :index, :create, :destroy ]
+    resources :organizations, only: [ :index, :new, :create, :show ] do
+      member do
+        post :invite
+        delete "members/:membership_id", to: "organizations#remove_member", as: :remove_member
+      end
+    end
   end
 end
