@@ -18,6 +18,16 @@ RSpec.describe Artifact, type: :model do
     expect(artifact.url).to eq("https://content.mcpublish.ai/p/abcd1234")
   end
 
+  it "builds the content URL from the configured content host, not a hardcoded constant" do
+    original_content_host = Rails.application.config.x.content_host
+    Rails.application.config.x.content_host = "artifacts.example.com"
+
+    artifact = Artifact.create!(api_key: api_key, slug: "abcd1234", storage_key: "artifacts/1", byte_size: 10)
+    expect(artifact.url).to eq("https://artifacts.example.com/p/abcd1234")
+  ensure
+    Rails.application.config.x.content_host = original_content_host
+  end
+
   it "requires a positive byte_size" do
     artifact = Artifact.new(api_key: api_key, storage_key: "artifacts/1", byte_size: 0)
     expect(artifact).not_to be_valid

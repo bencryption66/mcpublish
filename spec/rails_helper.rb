@@ -35,6 +35,11 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+  # Lets specs use freeze_time/travel_to — needed so tests involving
+  # Rack::Attack's real-clock rate-limit windows don't flake if they happen
+  # to straddle a window boundary mid-run.
+  config.include ActiveSupport::Testing::TimeHelpers
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')

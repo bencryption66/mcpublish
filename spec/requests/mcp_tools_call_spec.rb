@@ -48,6 +48,34 @@ RSpec.describe "MCP tools/call", type: :request do
       expect(result["result"]["content"].first["text"]).to match(/retry/i)
       expect(Artifact.count).to eq(0)
     end
+
+    it "surfaces a network failure (e.g. an S3 timeout) as a retryable error and rolls back the record" do
+      allow(ArtifactStorage).to receive(:put)
+        .and_raise(Seahorse::Client::NetworkingError.new(StandardError.new("timeout"), "boom"))
+
+      result = call_tool("publish_artifact", { html: "<html>hi</html>" })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(result["result"]["content"].first["text"]).to match(/retry/i)
+      expect(Artifact.count).to eq(0)
+    end
+
+    it "retries with a fresh slug when a concurrent publish collides on the DB unique index" do
+      original_save = Artifact.instance_method(:save!)
+      attempt = 0
+      allow_any_instance_of(Artifact).to receive(:save!) do |instance|
+        attempt += 1
+        raise ActiveRecord::RecordNotUnique, "duplicate key value violates unique constraint" if attempt == 1
+
+        original_save.bind(instance).call
+      end
+
+      result = call_tool("publish_artifact", { html: "<html>race</html>" })
+
+      expect(result["result"]["url"]).to match(%r{\Ahttps://content\.mcpublish\.ai/p/[a-zA-Z0-9]{8}\z})
+      expect(Artifact.count).to eq(1)
+      expect(attempt).to eq(2)
+    end
   end
 
   describe "update_artifact" do

@@ -12,16 +12,23 @@ RSpec.describe "MCP rate limiting", type: :request do
   end
 
   it "throttles publish_artifact calls after 30 in a minute" do
-    30.times { call_tool("publish_artifact", { html: "<html>x</html>" }) }
-    expect(response).not_to have_http_status(:too_many_requests)
+    # Rack::Attack buckets requests by Time.now.to_i / period, so an
+    # unfrozen clock could straddle a window boundary mid-test and reset
+    # the count. Freezing time keeps all 31 calls in the same window.
+    freeze_time do
+      30.times { call_tool("publish_artifact", { html: "<html>x</html>" }) }
+      expect(response).not_to have_http_status(:too_many_requests)
 
-    call_tool("publish_artifact", { html: "<html>x</html>" })
-    expect(response).to have_http_status(:too_many_requests)
+      call_tool("publish_artifact", { html: "<html>x</html>" })
+      expect(response).to have_http_status(:too_many_requests)
+    end
   end
 
   it "does not throttle list_artifacts even past 30 calls" do
-    35.times { call_tool("list_artifacts", {}) }
-    expect(response).not_to have_http_status(:too_many_requests)
+    freeze_time do
+      35.times { call_tool("list_artifacts", {}) }
+      expect(response).not_to have_http_status(:too_many_requests)
+    end
   end
 
   it "does not dispatch based on query-string params, only the parsed JSON body" do
