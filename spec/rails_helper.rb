@@ -40,6 +40,14 @@ RSpec.configure do |config|
   # to straddle a window boundary mid-run.
   config.include ActiveSupport::Testing::TimeHelpers
 
+  # Rack::Attack's throttle cache is a process-wide MemoryStore, not scoped
+  # per example and not rolled back by transactional fixtures. Without this,
+  # any spec that logs in/signs up more than a handful of times (e.g.
+  # organizations_spec.rb) can trip the web/login-* throttles added for
+  # session-fixation coverage purely from cross-example accumulation within
+  # a single file, unrelated to what that example is actually testing.
+  config.before { Rack::Attack.cache.store.clear }
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')

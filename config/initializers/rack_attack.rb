@@ -18,6 +18,16 @@ class Rack::Attack
 
     request.get_header("HTTP_AUTHORIZATION")
   end
+
+  throttle("web/login-signup-ip", limit: 10, period: 60) do |request|
+    request.ip if request.post? && %w[/login /signup].include?(request.path)
+  end
+
+  throttle("web/login-email", limit: 5, period: 60) do |request|
+    if request.post? && request.path == "/login"
+      request.params["email"].to_s.strip.downcase.presence
+    end
+  end
 end
 
 Rails.application.config.middleware.use Rack::Attack
