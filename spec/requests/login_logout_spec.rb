@@ -31,4 +31,18 @@ RSpec.describe "Login and logout", type: :request do
     get "/account"
     expect(response).to redirect_to("/login")
   end
+
+  it "renders the login page layout without error (regression: ActionDispatch::Flash must be loaded)" do
+    get "/login"
+    expect(response).to have_http_status(:ok)
+  end
+
+  it "logs out via a browser-style method-override POST" do
+    user = User.create!(email: "browser-test@example.com", password: "password123", password_confirmation: "password123")
+    post "/login", params: { email: user.email, password: "password123" }
+
+    post "/logout", params: { _method: "delete" }
+
+    expect(response).to redirect_to("/login")
+  end
 end

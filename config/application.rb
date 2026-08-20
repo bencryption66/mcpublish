@@ -41,14 +41,26 @@ module CoreHostingEngine
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # __Host- prefix in production: browsers refuse to accept a
+    # __Host--prefixed cookie that carries a Domain attribute or lacks
+    # Secure, which blocks a malicious content.mcpublish.ai page from
+    # planting a Domain-scoped cookie that mcpublish.ai would honor (cookie
+    # tossing). Requires HTTPS (config.force_ssl is set in production), so
+    # the plain name is used in development/test where there's no TLS.
+    SESSION_COOKIE_KEY = Rails.env.production? ? "__Host-mcpublish_session" : "_mcpublish_session"
+
     # config.api_only stays true — most of the app (McpController,
-    # ContentController) needs no session at all. These two middlewares add
-    # session/cookie support to the Rack stack for the controllers that
-    # explicitly opt in (WebController subclasses, via ActionController::Base).
-    # ActionController::API subclasses never include the Cookies/Session
-    # modules regardless of middleware presence, so this cannot leak into
-    # McpController or ContentController — see spec/requests/session_isolation_spec.rb.
+    # ContentController) needs no session at all. These middlewares add
+    # session/cookie/flash/method-override support to the Rack stack for the
+    # controllers that explicitly opt in (WebController subclasses, via
+    # ActionController::Base). ActionController::API subclasses never include
+    # the Cookies/Session modules regardless of middleware presence, so this
+    # cannot leak into McpController or ContentController — both also
+    # override `session` to raise if ever called, as a hard guard on top of
+    # that — see spec/requests/session_isolation_spec.rb.
     config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore, key: "_mcpublish_session"
+    config.middleware.use ActionDispatch::Session::CookieStore, key: SESSION_COOKIE_KEY
+    config.middleware.use ActionDispatch::Flash
+    config.middleware.use Rack::MethodOverride
   end
 end
