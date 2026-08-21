@@ -79,20 +79,21 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
+  # DATABASE_URL only auto-merges into the config named "primary" — cache/
+  # queue/cable need it set explicitly or they fall back to a local socket
+  # connection with no host at all. Rather than provisioning four separate
+  # Postgres databases, all four share one connection/database here; solid_
+  # cache/queue/cable each use distinctly-prefixed table names, so there's
+  # no collision, and migrations_paths keeps each one's schema separate.
   primary: &primary_production
     <<: *default
-    database: core_hosting_engine_production
-    username: core_hosting_engine
-    password: <%= ENV["CORE_HOSTING_ENGINE_DATABASE_PASSWORD"] %>
+    url: <%= ENV["DATABASE_URL"] %>
   cache:
     <<: *primary_production
-    database: core_hosting_engine_production_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: core_hosting_engine_production_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: core_hosting_engine_production_cable
     migrations_paths: db/cable_migrate
