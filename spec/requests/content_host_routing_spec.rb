@@ -16,7 +16,7 @@ RSpec.describe "Content host / route host coupling", type: :request do
       Rails.application.reload_routes!
 
       user = User.create!(email: "bob@example.com", password: "password123", password_confirmation: "password123")
-      artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 20)
+      artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 20, visibility: "public")
       ArtifactStorage.client.stub_responses(:get_object, body: "<html>hi</html>")
 
       # The content route now follows the new content_host...
@@ -48,7 +48,7 @@ RSpec.describe "Content host / route host coupling", type: :request do
 
   it "normalizes host comparison for case and a trailing dot so /mcp can't silently reopen on the content host" do
     user = User.create!(email: "bob@example.com", password: "password123", password_confirmation: "password123")
-    artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 20)
+    artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 20, visibility: "public")
     ArtifactStorage.client.stub_responses(:get_object, body: "<html>hi</html>")
 
     # A case-mismatched variant of the content host: the comparison must

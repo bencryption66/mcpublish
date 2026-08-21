@@ -13,7 +13,7 @@ RSpec.describe "Session middleware does not leak into API-only hosts", type: :re
 
   it "does not set a cookie on GET content.mcpublish.ai/p/:slug" do
     user = User.create!(email: "alice@example.com", password: "password123", password_confirmation: "password123")
-    artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 5)
+    artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 5, visibility: "public")
     ArtifactStorage.client.stub_responses(:get_object, body: "<html>hi</html>")
 
     host! "content.mcpublish.ai"
