@@ -86,6 +86,56 @@ RSpec.describe "MCP tools/call", type: :request do
       expect(Artifact.count).to eq(1)
       expect(attempt).to eq(2)
     end
+
+    it "publishes with organisation visibility when the caller belongs to the organization" do
+      org = Organization.create!(name: "Acme", slug: "acme")
+      OrganizationMembership.create!(user: user, organization: org, role: "admin")
+
+      result = call_tool("publish_artifact", { html: "<html>hi</html>", visibility: "organisation", organization: "acme" })
+
+      artifact = Artifact.find_by(slug: result["result"]["slug"])
+      expect(artifact.visibility).to eq("organisation")
+      expect(artifact.organization).to eq(org)
+    end
+
+    it "rejects publishing with an organization the caller does not belong to" do
+      Organization.create!(name: "Acme", slug: "acme")
+
+      result = call_tool("publish_artifact", { html: "<html>hi</html>", visibility: "organisation", organization: "acme" })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.count).to eq(0)
+    end
+
+    it "publishes with shared visibility and creates ArtifactShare rows" do
+      result = call_tool("publish_artifact", { html: "<html>hi</html>", visibility: "shared", shared_with: [ "invitee@example.com" ] })
+
+      artifact = Artifact.find_by(slug: result["result"]["slug"])
+      expect(artifact.visibility).to eq("shared")
+      expect(artifact.artifact_shares.pluck(:email)).to eq([ "invitee@example.com" ])
+    end
+
+    it "rejects a malformed email in shared_with" do
+      result = call_tool("publish_artifact", { html: "<html>hi</html>", visibility: "shared", shared_with: [ "not-an-email" ] })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.count).to eq(0)
+    end
+
+    it "does not partially apply shared_with when a later email is malformed" do
+      result = call_tool("publish_artifact", { html: "<html>hi</html>", visibility: "shared", shared_with: [ "good@example.com", "not-an-email" ] })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.count).to eq(0)
+      expect(ArtifactShare.count).to eq(0)
+    end
+
+    it "rejects an invalid visibility value" do
+      result = call_tool("publish_artifact", { html: "<html>hi</html>", visibility: "bogus" })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.count).to eq(0)
+    end
   end
 
   describe "update_artifact" do
@@ -112,6 +162,56 @@ RSpec.describe "MCP tools/call", type: :request do
 
       expect(not_owned["result"]["content"]).to eq(not_found["result"]["content"])
     end
+
+    it "changes visibility without resending html" do
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>" })
+      slug = publish_result["result"]["slug"]
+
+      result = call_tool("update_artifact", { slug: slug, visibility: "public" })
+
+      expect(result["result"]["isError"]).to be_nil
+      expect(Artifact.find_by(slug: slug).visibility).to eq("public")
+      expect(Artifact.find_by(slug: slug).byte_size).to eq("<html>v1</html>".bytesize)
+    end
+
+    it "replaces the full shared_with list rather than appending to it" do
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>", visibility: "shared", shared_with: [ "a@example.com", "b@example.com" ] })
+      slug = publish_result["result"]["slug"]
+
+      call_tool("update_artifact", { slug: slug, shared_with: [ "b@example.com" ] })
+
+      expect(Artifact.find_by(slug: slug).artifact_shares.pluck(:email)).to eq([ "b@example.com" ])
+    end
+
+    it "does not partially apply shared_with when a later email is malformed, leaving the prior list intact" do
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>", visibility: "shared", shared_with: [ "a@example.com" ] })
+      slug = publish_result["result"]["slug"]
+
+      result = call_tool("update_artifact", { slug: slug, shared_with: [ "good@example.com", "not-an-email" ] })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.find_by(slug: slug).artifact_shares.pluck(:email)).to eq([ "a@example.com" ])
+    end
+
+    it "clears the organization when switching away from organisation visibility" do
+      org = Organization.create!(name: "Acme", slug: "acme")
+      OrganizationMembership.create!(user: user, organization: org, role: "admin")
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>", visibility: "organisation", organization: "acme" })
+      slug = publish_result["result"]["slug"]
+
+      call_tool("update_artifact", { slug: slug, visibility: "private" })
+
+      expect(Artifact.find_by(slug: slug).organization).to be_nil
+    end
+
+    it "clears artifact_shares when switching away from shared visibility" do
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>", visibility: "shared", shared_with: [ "a@example.com" ] })
+      slug = publish_result["result"]["slug"]
+
+      call_tool("update_artifact", { slug: slug, visibility: "private" })
+
+      expect(Artifact.find_by(slug: slug).artifact_shares).to be_empty
+    end
   end
 
   describe "list_artifacts" do
@@ -122,6 +222,19 @@ RSpec.describe "MCP tools/call", type: :request do
       result = call_tool("list_artifacts", {})
 
       expect(result["result"]["artifacts"].length).to eq(1)
+    end
+
+    it "includes visibility, organization, and shared_with for each artifact" do
+      org = Organization.create!(name: "Acme", slug: "acme")
+      OrganizationMembership.create!(user: user, organization: org, role: "admin")
+      call_tool("publish_artifact", { html: "<html>hi</html>", visibility: "organisation", organization: "acme" })
+
+      result = call_tool("list_artifacts", {})
+
+      artifact_data = result["result"]["artifacts"].first
+      expect(artifact_data["visibility"]).to eq("organisation")
+      expect(artifact_data["organization"]).to eq("acme")
+      expect(artifact_data["shared_with"]).to eq([])
     end
   end
 

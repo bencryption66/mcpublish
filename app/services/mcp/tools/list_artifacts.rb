@@ -11,6 +11,9 @@ module Mcp
             slug: artifact.slug,
             url: artifact.url,
             byte_size: artifact.byte_size,
+            visibility: artifact.visibility,
+            organization: artifact.organization&.slug,
+            shared_with: artifact.artifact_shares.pluck(:email),
             created_at: artifact.created_at.iso8601,
             updated_at: artifact.updated_at.iso8601
           }
