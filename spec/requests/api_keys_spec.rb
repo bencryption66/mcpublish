@@ -24,6 +24,19 @@ RSpec.describe "API key management", type: :request do
     expect(user.api_keys.last.label).to eq("My laptop")
   end
 
+  it "rejects a blank label with a friendly message instead of erroring" do
+    sign_in_as(user)
+
+    expect {
+      post "/api_keys", params: { label: "   " }
+    }.not_to change { user.api_keys.count }
+
+    expect(response).to redirect_to("/api_keys")
+    follow_redirect!
+    expect(response.body).to include("flash flash-alert")
+    expect(response.body).to include("Please give the key a label")
+  end
+
   it "shows the raw token and a ready-to-paste MCP command once after creation" do
     sign_in_as(user)
 

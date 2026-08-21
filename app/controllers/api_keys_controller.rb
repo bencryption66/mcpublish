@@ -6,7 +6,13 @@ class ApiKeysController < WebController
   end
 
   def create
-    _api_key, raw_token = ApiKey.issue!(label: params[:label], user: current_user)
+    label = params[:label].to_s.strip
+    if label.blank?
+      redirect_to api_keys_path, alert: "Please give the key a label"
+      return
+    end
+
+    _api_key, raw_token = ApiKey.issue!(label: label, user: current_user)
     flash[:new_api_key] = raw_token
     redirect_to api_keys_path, notice: "API key created — copy it below, it will not be shown again."
   end
