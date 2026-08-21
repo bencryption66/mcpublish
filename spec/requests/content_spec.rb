@@ -1,8 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Content serving", type: :request do
-  let(:api_key) { ApiKey.issue!(label: "Alice").first }
-  let(:artifact) { Artifact.create!(api_key: api_key, storage_key: "artifacts/1", byte_size: 20) }
+  let(:user) { User.create!(email: "alice@example.com", password: "password123", password_confirmation: "password123") }
+  let(:artifact) { Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 20) }
 
   before do
     ArtifactStorage.client.stub_responses(:get_object, body: "<html>hello</html>")

@@ -1,5 +1,5 @@
 class Artifact < ApplicationRecord
-  belongs_to :api_key
+  belongs_to :user
 
   validates :slug, presence: true, uniqueness: true
   validates :storage_key, presence: true

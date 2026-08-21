@@ -4,8 +4,8 @@ module Mcp
       MAX_BYTES = Mcp::Tools::PublishArtifact::MAX_BYTES
       NOT_FOUND_MESSAGE = "Artifact not found".freeze
 
-      def initialize(api_key:, arguments:)
-        @api_key = api_key
+      def initialize(user:, arguments:)
+        @user = user
         @slug = arguments["slug"]
         @html = arguments["html"]
       end
@@ -17,7 +17,7 @@ module Mcp
           raise ToolDispatcher::ToolError, "Artifact exceeds maximum size of #{MAX_BYTES} bytes"
         end
 
-        artifact = @api_key.artifacts.find_by(slug: @slug)
+        artifact = @user.artifacts.find_by(slug: @slug)
         raise ToolDispatcher::ToolError, NOT_FOUND_MESSAGE unless artifact
 
         begin

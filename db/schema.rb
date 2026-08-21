@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_20_181417) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_21_084338) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,13 +27,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_20_181417) do
 
   create_table "artifacts", force: :cascade do |t|
     t.string "slug", null: false
-    t.bigint "api_key_id", null: false
     t.string "storage_key", null: false
     t.integer "byte_size", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["api_key_id"], name: "index_artifacts_on_api_key_id"
+    t.bigint "user_id"
     t.index ["slug"], name: "index_artifacts_on_slug", unique: true
+    t.index ["user_id"], name: "index_artifacts_on_user_id"
   end
 
   create_table "organization_invites", force: :cascade do |t|
@@ -73,7 +73,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_20_181417) do
   end
 
   add_foreign_key "api_keys", "users"
-  add_foreign_key "artifacts", "api_keys"
+  add_foreign_key "artifacts", "users"
   add_foreign_key "organization_invites", "organizations"
   add_foreign_key "organization_memberships", "organizations"
   add_foreign_key "organization_memberships", "users"

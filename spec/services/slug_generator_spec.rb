@@ -8,9 +8,9 @@ RSpec.describe SlugGenerator do
     end
 
     it "does not return a slug already used by an existing artifact" do
-      api_key, = ApiKey.issue!(label: "Alice")
+      user = User.create!(email: "alice@example.com", password: "password123", password_confirmation: "password123")
       taken_slug = SlugGenerator.generate_unique
-      Artifact.create!(api_key: api_key, slug: taken_slug, storage_key: "artifacts/1", byte_size: 10)
+      Artifact.create!(user: user, slug: taken_slug, storage_key: "artifacts/1", byte_size: 10)
 
       allow(SlugGenerator).to receive(:candidate).and_return(taken_slug, "freshone1")
 

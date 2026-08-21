@@ -1,6 +1,5 @@
 class ApiKey < ApplicationRecord
   belongs_to :user, optional: true
-  has_many :artifacts, dependent: :destroy
 
   TOKEN_PREFIX = "mcpub_".freeze
 

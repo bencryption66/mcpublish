@@ -3,15 +3,15 @@ module Mcp
     class DeleteArtifact
       NOT_FOUND_MESSAGE = Mcp::Tools::UpdateArtifact::NOT_FOUND_MESSAGE
 
-      def initialize(api_key:, arguments:)
-        @api_key = api_key
+      def initialize(user:, arguments:)
+        @user = user
         @slug = arguments["slug"]
       end
 
       def call
         raise ToolDispatcher::ToolError, "Missing required argument: slug" if @slug.blank?
 
-        artifact = @api_key.artifacts.find_by(slug: @slug)
+        artifact = @user.artifacts.find_by(slug: @slug)
         raise ToolDispatcher::ToolError, NOT_FOUND_MESSAGE unless artifact
 
         begin

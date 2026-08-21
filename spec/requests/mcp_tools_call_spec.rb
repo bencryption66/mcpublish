@@ -1,11 +1,12 @@
 require "rails_helper"
 
 RSpec.describe "MCP tools/call", type: :request do
-  let!(:api_key_pair) { ApiKey.issue!(label: "Alice") }
-  let(:api_key) { api_key_pair.first }
+  let(:user) { User.create!(email: "alice@example.com", password: "password123", password_confirmation: "password123") }
+  let!(:api_key_pair) { ApiKey.issue!(label: "Alice", user: user) }
   let(:token) { api_key_pair.last }
 
-  let!(:other_key_pair) { ApiKey.issue!(label: "Bob") }
+  let(:other_user) { User.create!(email: "bob@example.com", password: "password123", password_confirmation: "password123") }
+  let!(:other_key_pair) { ApiKey.issue!(label: "Bob", user: other_user) }
   let(:other_api_key) { other_key_pair.first }
 
   def call_tool(name, arguments, token: self.token, id: 1)
@@ -21,7 +22,7 @@ RSpec.describe "MCP tools/call", type: :request do
 
       expect(result["result"]["url"]).to match(%r{\Ahttps://content\.mcpublish\.ai/p/[a-zA-Z0-9]{8}\z})
       expect(Artifact.count).to eq(1)
-      expect(Artifact.first.api_key).to eq(api_key)
+      expect(Artifact.first.user).to eq(user)
     end
 
     it "rejects a missing html argument" do
@@ -60,6 +61,15 @@ RSpec.describe "MCP tools/call", type: :request do
       expect(Artifact.count).to eq(0)
     end
 
+    it "rejects a request from an API key with no owning user" do
+      ownerless_token = ApiKey.issue!(label: "Ownerless").last
+
+      result = call_tool("publish_artifact", { html: "<html>hi</html>" }, token: ownerless_token)
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.count).to eq(0)
+    end
+
     it "retries with a fresh slug when a concurrent publish collides on the DB unique index" do
       original_save = Artifact.instance_method(:save!)
       attempt = 0
@@ -95,7 +105,7 @@ RSpec.describe "MCP tools/call", type: :request do
     end
 
     it "returns the identical generic error for a slug owned by someone else" do
-      other_artifact = Artifact.create!(api_key: other_api_key, storage_key: "artifacts/x", byte_size: 5)
+      other_artifact = Artifact.create!(user: other_user, storage_key: "artifacts/x", byte_size: 5)
 
       not_found = call_tool("update_artifact", { slug: "nosuchslug", html: "<html></html>" })
       not_owned = call_tool("update_artifact", { slug: other_artifact.slug, html: "<html></html>" })
@@ -105,9 +115,9 @@ RSpec.describe "MCP tools/call", type: :request do
   end
 
   describe "list_artifacts" do
-    it "returns only artifacts owned by the calling key" do
+    it "returns only artifacts owned by the calling user" do
       call_tool("publish_artifact", { html: "<html>mine</html>" })
-      Artifact.create!(api_key: other_api_key, storage_key: "artifacts/x", byte_size: 5)
+      Artifact.create!(user: other_user, storage_key: "artifacts/x", byte_size: 5)
 
       result = call_tool("list_artifacts", {})
 
@@ -127,7 +137,7 @@ RSpec.describe "MCP tools/call", type: :request do
     end
 
     it "returns the identical generic error for not-found and not-owned slugs" do
-      other_artifact = Artifact.create!(api_key: other_api_key, storage_key: "artifacts/x", byte_size: 5)
+      other_artifact = Artifact.create!(user: other_user, storage_key: "artifacts/x", byte_size: 5)
 
       not_found = call_tool("delete_artifact", { slug: "nosuchslug" })
       not_owned = call_tool("delete_artifact", { slug: other_artifact.slug })

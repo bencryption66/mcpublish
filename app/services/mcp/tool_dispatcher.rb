@@ -2,11 +2,11 @@ module Mcp
   class ToolDispatcher
     class ToolError < StandardError; end
 
-    def self.call(tool_name:, arguments:, api_key:)
+    def self.call(tool_name:, arguments:, user:)
       tool_class = tool_classes[tool_name]
       raise ToolError, "Unknown tool: #{tool_name}" unless tool_class
 
-      tool_class.new(api_key: api_key, arguments: arguments).call
+      tool_class.new(user: user, arguments: arguments).call
     end
 
     def self.tool_classes

@@ -42,8 +42,11 @@ class McpController < ApplicationController
   def handle_tools_call
     tool_name = payload.dig("params", "name")
     arguments = payload.dig("params", "arguments") || {}
+    user = current_api_key.user
 
-    result = Mcp::ToolDispatcher.call(tool_name: tool_name, arguments: arguments, api_key: current_api_key)
+    raise Mcp::ToolDispatcher::ToolError, "This API key has no owning user" unless user
+
+    result = Mcp::ToolDispatcher.call(tool_name: tool_name, arguments: arguments, user: user)
     render json: success_response(result)
   rescue Mcp::ToolDispatcher::ToolError => e
     render json: success_response({ content: [ { type: "text", text: e.message } ], isError: true })

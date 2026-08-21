@@ -4,8 +4,8 @@ module Mcp
       MAX_BYTES = 5.megabytes
       MAX_SLUG_ATTEMPTS = 3
 
-      def initialize(api_key:, arguments:)
-        @api_key = api_key
+      def initialize(user:, arguments:)
+        @user = user
         @html = arguments["html"]
       end
 
@@ -38,7 +38,7 @@ module Mcp
         begin
           attempts += 1
           artifact = Artifact.new(
-            api_key: @api_key,
+            user: @user,
             storage_key: "artifacts/#{SecureRandom.uuid}",
             byte_size: @html.bytesize
           )

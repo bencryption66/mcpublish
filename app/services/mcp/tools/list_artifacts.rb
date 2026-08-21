@@ -1,12 +1,12 @@
 module Mcp
   module Tools
     class ListArtifacts
-      def initialize(api_key:, arguments:)
-        @api_key = api_key
+      def initialize(user:, arguments:)
+        @user = user
       end
 
       def call
-        artifacts = @api_key.artifacts.order(created_at: :desc).map do |artifact|
+        artifacts = @user.artifacts.order(created_at: :desc).map do |artifact|
           {
             slug: artifact.slug,
             url: artifact.url,
