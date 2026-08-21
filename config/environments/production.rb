@@ -77,11 +77,14 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
   #
+  # Unlike Flash/Cookies/MethodOverride (see config/application.rb),
+  # ActionDispatch::HostAuthorization is inserted unconditionally by Rails
+  # whenever config.hosts is non-empty — config.api_only has no bearing on
+  # it (confirmed against railties' default_middleware_stack.rb). Setting
+  # config.hosts here is genuinely sufficient on its own.
+  config.hosts = [ "mcpublish.ai", "content.mcpublish.ai", "mcpublish.fly.dev" ]
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
