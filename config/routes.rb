@@ -34,5 +34,6 @@ Rails.application.routes.draw do
         delete "members/:membership_id", to: "organizations#remove_member", as: :remove_member
       end
     end
+    get "/artifacts/:slug/view", to: "artifacts#view", as: :view_artifact
   end
 end
