@@ -1,0 +1,175 @@
+/* McPublish design system — tokens */
+:root {
+  --ink: #23262e;
+  --persimmon: #e8643c;
+  --cream: #f7f1e6;
+  --border: #e5dcc9;
+  --muted: #6b6455;
+  --card: #ffffff;
+  --font: "Figtree", -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* base */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.5;
+}
+a { color: var(--ink); }
+h1, h2, h3 { line-height: 1.15; margin: 0 0 0.5rem; }
+.container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+main.container { padding-top: 32px; padding-bottom: 56px; min-height: 55vh; }
+.muted { color: var(--muted); }
+
+/* nav */
+.site-nav { border-bottom: 1px solid var(--border); background: var(--cream); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
+.nav-left { display: flex; align-items: center; gap: 10px; }
+.nav-left > a { text-decoration: none; }
+.nav-links { display: flex; align-items: center; gap: 16px; }
+.nav-links a { font-weight: 600; font-size: 0.95rem; text-decoration: none; }
+.nav-links a:hover { color: var(--persimmon); }
+
+/* logo lockup */
+.logo-lockup { display: inline-flex; align-items: center; gap: 9px; }
+.logo-lockup svg { display: block; }
+.logo-word { font-weight: 800; letter-spacing: 0.3px; color: var(--ink); font-size: 1.15rem; }
+.logo-ai { color: var(--persimmon); }
+
+/* beta pill */
+.beta-pill {
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--persimmon);
+  border: 1.5px solid var(--persimmon);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+/* buttons */
+.btn {
+  display: inline-block;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 9px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary { background: var(--persimmon); color: #fff; }
+.btn-primary:hover { filter: brightness(0.94); }
+.btn-outline { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+.btn-outline:hover { background: var(--ink); color: var(--cream); }
+.btn-sm { padding: 6px 14px; font-size: 0.85rem; }
+.linklike {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--font); font-weight: 600; font-size: 0.95rem;
+  color: var(--ink); text-decoration: underline;
+}
+.linklike:hover { color: var(--persimmon); }
+
+/* flash */
+.flash { padding: 10px 20px; font-weight: 600; font-size: 0.92rem; }
+.flash-notice { background: var(--ink); color: var(--cream); }
+.flash-alert { background: var(--persimmon); color: #fff; }
+
+/* footer */
+.site-footer { border-top: 1px solid var(--border); padding: 26px 0; }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.footer-links { display: flex; gap: 16px; }
+.footer-links a { font-size: 0.88rem; text-decoration: none; }
+.footer-note { font-size: 0.82rem; color: var(--muted); }
+
+/* homepage: hero */
+.hero { text-align: center; padding: 56px 0 40px; }
+.hero-title { font-size: 3.1rem; font-weight: 800; letter-spacing: -0.5px; }
+.hero-accent { color: var(--persimmon); }
+.hero-sub { max-width: 540px; margin: 14px auto 0; color: var(--muted); font-size: 1.1rem; }
+.hero-ctas { margin-top: 26px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* homepage: steps */
+.steps { display: flex; gap: 14px; padding: 26px 0; }
+.step-card {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  font-size: 0.95rem;
+}
+.step-card h3 { font-size: 1rem; margin-bottom: 6px; }
+.step-num { color: var(--persimmon); font-weight: 800; margin-right: 4px; }
+.step-card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+/* homepage: examples */
+.examples-title { text-align: center; font-size: 1.5rem; margin: 40px 0 18px; }
+.ex-grid { display: flex; gap: 14px; padding-bottom: 24px; }
+.ex-card { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.ex-art { display: flex; gap: 6px; padding: 16px 14px; align-items: flex-end; height: 78px; }
+.ex-bar { border-radius: 5px; flex: 1; }
+.t-cream { background: #efe6d3; height: 55%; }
+.t-persimmon { background: rgba(232, 100, 60, 0.25); height: 90%; }
+.t-ink { background: rgba(35, 38, 46, 0.15); height: 70%; }
+.ex-caption { padding: 0 14px 14px; font-size: 0.85rem; }
+.ex-caption b { display: block; font-size: 0.92rem; }
+.ex-caption span { color: var(--muted); }
+
+/* app pages */
+.page-head { margin-bottom: 20px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+.auth-card { max-width: 400px; margin: 32px auto; }
+.form-field { margin-bottom: 14px; }
+.form-field label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
+.form-field input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  background: #fff;
+}
+.form-field input:focus { outline: none; border-color: var(--persimmon); }
+.form-actions { margin-top: 18px; }
+.error-list {
+  background: rgba(232, 100, 60, 0.1);
+  border: 1px solid var(--persimmon);
+  border-radius: 8px;
+  padding: 10px 14px 10px 30px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  margin: 0 0 14px;
+}
+.row-list { list-style: none; margin: 0; padding: 0; }
+.row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.row-item:last-child { border-bottom: none; }
+.row-actions { display: flex; align-items: center; gap: 10px; }
+.inline-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.inline-form .form-field { margin-bottom: 0; flex: 1; min-width: 200px; }
+
+/* mobile */
+@media (max-width: 700px) {
+  .hero-title { font-size: 2.1rem; }
+  .steps, .ex-grid { flex-direction: column; }
+  .nav-inner { flex-wrap: wrap; gap: 10px; }
+}

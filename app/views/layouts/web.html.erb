@@ -1,13 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>mcpublish</title>
+    <title><%= content_for(:title) || "McPublish.ai" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Turn AI chats into live, shareable pages. Connect McPublish to your AI agent and publish anything it makes with one sentence.">
+    <meta property="og:title" content="McPublish.ai — Just McPublish it">
+    <meta property="og:description" content="Turn AI chats into live, shareable pages. Connect McPublish to your AI agent and publish anything it makes with one sentence.">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/site.css?v=1">
   </head>
   <body>
+    <%= render "shared/nav" %>
     <% flash.each do |type, message| %>
-      <p role="alert"><%= message %></p>
+      <p role="alert" class="flash <%= type.to_s == "alert" ? "flash-alert" : "flash-notice" %>"><%= message %></p>
     <% end %>
-    <%= yield %>
+    <main class="container">
+      <%= yield %>
+    </main>
+    <%= render "shared/footer" %>
   </body>
 </html>

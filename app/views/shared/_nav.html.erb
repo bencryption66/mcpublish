@@ -1,0 +1,17 @@
+<header class="site-nav">
+  <div class="container nav-inner">
+    <div class="nav-left">
+      <a href="/"><%= render "shared/logo" %></a>
+      <span class="beta-pill">Beta</span>
+    </div>
+    <nav class="nav-links">
+      <% if current_user %>
+        <a href="<%= account_path %>">Account</a>
+        <%= button_to "Log out", logout_path, method: :delete, class: "linklike" %>
+      <% else %>
+        <a href="<%= login_path %>">Log in</a>
+        <a href="<%= signup_path %>" class="btn btn-primary btn-sm">Sign up</a>
+      <% end %>
+    </nav>
+  </div>
+</header>
