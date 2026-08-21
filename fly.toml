@@ -5,9 +5,13 @@ primary_region = "lhr"
 
 [env]
   RAILS_LOG_TO_STDOUT = "1"
+  # The container runs as a non-root user (Dockerfile: USER 1000:1000), so
+  # Thruster can't bind port 80 directly (Linux reserves ports < 1024 for
+  # root) — move it above 1024 and point Fly's proxy at that port instead.
+  HTTP_PORT = "8080"
 
 [http_service]
-  internal_port = 80
+  internal_port = 8080
   force_https = true
   auto_stop_machines = "stop"
   auto_start_machines = true
@@ -24,6 +28,6 @@ primary_region = "lhr"
     interval = "15s"
     method = "GET"
     path = "/up"
-    port = 80
+    port = 8080
     timeout = "5s"
     type = "http"
