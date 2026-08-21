@@ -83,7 +83,7 @@ Rails.application.configure do
   # whenever config.hosts is non-empty — config.api_only has no bearing on
   # it (confirmed against railties' default_middleware_stack.rb). Setting
   # config.hosts here is genuinely sufficient on its own.
-  config.hosts = [ "mcpublish.ai", "content.mcpublish.ai", "mcpublish.fly.dev" ]
+  config.hosts = [ "mcpublish.ai", "www.mcpublish.ai", "content.mcpublish.ai", "mcpublish.fly.dev" ]
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }

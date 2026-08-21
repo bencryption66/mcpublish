@@ -142,7 +142,11 @@ main.container { padding-top: 32px; padding-bottom: 56px; min-height: 55vh; }
   font-size: 0.95rem;
   background: #fff;
 }
-.form-field input:focus { outline: none; border-color: var(--persimmon); }
+.form-field input:focus {
+  outline: 2px solid var(--persimmon);
+  outline-offset: 1px;
+  border-color: var(--persimmon);
+}
 .form-actions { margin-top: 18px; }
 .error-list {
   background: rgba(232, 100, 60, 0.1);

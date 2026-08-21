@@ -14,8 +14,8 @@ RSpec.describe "Shared web layout", type: :request do
   it "shows Log in and Sign up when signed out" do
     get "/login"
 
-    expect(response.body).to include("Sign up")
-    expect(response.body).to include("nav-links")
+    expect(response.body).to include(%(<a href="/signup" class="btn btn-primary btn-sm">))
+    expect(response.body).not_to include(">Account</a>")
   end
 
   it "shows Account and Log out when signed in" do
@@ -45,5 +45,33 @@ RSpec.describe "Shared web layout", type: :request do
     get "/login"
 
     expect(response.body).to include("auth-card")
+  end
+
+  it "serves the stylesheet as a static file" do
+    get "/assets/site.css"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("--persimmon")
+  end
+
+  it "serves the icon as a static file" do
+    get "/icon.svg"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("#e8643c")
+  end
+
+  it "redirects www to the apex domain, preserving the path" do
+    host! "www.mcpublish.ai"
+    get "/login"
+
+    expect(response).to redirect_to("https://mcpublish.ai/login")
+  end
+
+  it "renders alert flashes with the flash-alert class" do
+    get "/account"
+    follow_redirect!
+
+    expect(response.body).to include("flash flash-alert")
   end
 end

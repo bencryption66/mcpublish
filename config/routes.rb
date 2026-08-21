@@ -7,6 +7,12 @@ Rails.application.routes.draw do
   content_host = Rails.application.config.x.content_host
   on_content_host = ->(req) { req.host.to_s.downcase.delete_suffix(".") == content_host }
 
+  on_www = ->(req) { req.host.to_s.downcase.delete_suffix(".") == "www.mcpublish.ai" }
+
+  constraints(on_www) do
+    match "(*path)", to: redirect { |params, req| "https://mcpublish.ai#{req.fullpath}" }, via: :all
+  end
+
   constraints(on_content_host) do
     get "/p/:slug", to: "content#show"
   end
