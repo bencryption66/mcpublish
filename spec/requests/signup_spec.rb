@@ -49,4 +49,17 @@ RSpec.describe "Signup", type: :request do
     new_user = User.find_by!(email: "invitee@example.com")
     expect(ArtifactShare.find_by(artifact: artifact).user).to eq(new_user)
   end
+
+  it "redirects a newly signed-up user back to the artifact they were invited to view" do
+    owner = User.create!(email: "owner@example.com", password: "password123", password_confirmation: "password123")
+    artifact = Artifact.create!(user: owner, storage_key: "artifacts/1", byte_size: 5, visibility: "shared")
+    ArtifactShare.create!(artifact: artifact, email: "invitee@example.com")
+
+    get "/artifacts/#{artifact.slug}/view"
+    expect(response).to redirect_to("/login")
+
+    post "/signup", params: { user: { email: "invitee@example.com", password: "password123", password_confirmation: "password123" } }
+
+    expect(response).to redirect_to("/artifacts/#{artifact.slug}/view")
+  end
 end

@@ -25,6 +25,21 @@ module Mcp
         artifact = @user.artifacts.find_by(slug: @slug)
         raise ToolDispatcher::ToolError, NOT_FOUND_MESSAGE unless artifact
 
+        effective_visibility = @visibility || artifact.visibility
+
+        if @organization_slug && effective_visibility != "organisation"
+          raise ToolDispatcher::ToolError, "organization can only be set when visibility is organisation"
+        end
+        if @shared_with && effective_visibility != "shared"
+          raise ToolDispatcher::ToolError, "shared_with can only be set when visibility is shared"
+        end
+
+        organization =
+          if effective_visibility == "organisation"
+            OrganizationResolver.resolve(user: @user, slug: @organization_slug || artifact.organization&.slug)
+          end
+        SharedWithApplier.validate!(@shared_with) if @shared_with
+
         if @html.present?
           begin
             ArtifactStorage.put(storage_key: artifact.storage_key, content: @html)
@@ -33,22 +48,18 @@ module Mcp
           end
         end
 
-        apply_updates(artifact)
+        apply_updates(artifact, organization)
 
         { content: [ { type: "text", text: artifact.url } ], slug: artifact.slug, url: artifact.url }
       end
 
       private
 
-      def apply_updates(artifact)
+      def apply_updates(artifact, organization)
         attributes = {}
         attributes[:byte_size] = @html.bytesize if @html.present?
-
-        if @visibility
-          attributes[:visibility] = @visibility
-          attributes[:organization] =
-            @visibility == "organisation" ? OrganizationResolver.resolve(user: @user, slug: @organization_slug) : nil
-        end
+        attributes[:visibility] = @visibility if @visibility
+        attributes[:organization] = organization if @visibility || @organization_slug
 
         artifact.update!(attributes) if attributes.any?
 

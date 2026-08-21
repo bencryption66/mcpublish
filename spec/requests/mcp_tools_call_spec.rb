@@ -136,6 +136,22 @@ RSpec.describe "MCP tools/call", type: :request do
       expect(result["result"]["isError"]).to eq(true)
       expect(Artifact.count).to eq(0)
     end
+
+    it "rejects an organization param when visibility is not organisation" do
+      Organization.create!(name: "Acme", slug: "acme")
+
+      result = call_tool("publish_artifact", { html: "<html>hi</html>", organization: "acme" })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.count).to eq(0)
+    end
+
+    it "rejects a shared_with param when visibility is not shared" do
+      result = call_tool("publish_artifact", { html: "<html>hi</html>", shared_with: [ "x@example.com" ] })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.count).to eq(0)
+    end
   end
 
   describe "update_artifact" do
@@ -210,6 +226,41 @@ RSpec.describe "MCP tools/call", type: :request do
 
       call_tool("update_artifact", { slug: slug, visibility: "private" })
 
+      expect(Artifact.find_by(slug: slug).artifact_shares).to be_empty
+    end
+
+    it "changes organization without resending visibility" do
+      org = Organization.create!(name: "Acme", slug: "acme")
+      OrganizationMembership.create!(user: user, organization: org, role: "admin")
+      other_org = Organization.create!(name: "Globex", slug: "globex")
+      OrganizationMembership.create!(user: user, organization: other_org, role: "admin")
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>", visibility: "organisation", organization: "acme" })
+      slug = publish_result["result"]["slug"]
+
+      result = call_tool("update_artifact", { slug: slug, organization: "globex" })
+
+      expect(result["result"]["isError"]).to be_nil
+      expect(Artifact.find_by(slug: slug).organization.slug).to eq("globex")
+    end
+
+    it "rejects an organization param when the effective visibility is not organisation" do
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>" })
+      slug = publish_result["result"]["slug"]
+      Organization.create!(name: "Acme", slug: "acme")
+
+      result = call_tool("update_artifact", { slug: slug, organization: "acme" })
+
+      expect(result["result"]["isError"]).to eq(true)
+      expect(Artifact.find_by(slug: slug).organization).to be_nil
+    end
+
+    it "rejects a shared_with param when the effective visibility is not shared" do
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>" })
+      slug = publish_result["result"]["slug"]
+
+      result = call_tool("update_artifact", { slug: slug, shared_with: [ "x@example.com" ] })
+
+      expect(result["result"]["isError"]).to eq(true)
       expect(Artifact.find_by(slug: slug).artifact_shares).to be_empty
     end
   end

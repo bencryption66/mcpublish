@@ -32,6 +32,11 @@ RSpec.describe "Content serving", type: :request do
     expect(response).to redirect_to("https://mcpublish.ai/artifacts/nosuchslug/view")
   end
 
+  it "sets no Set-Cookie header on the redirect path" do
+    get "/p/nosuchslug"
+    expect(response.headers["Set-Cookie"]).to be_nil
+  end
+
   it "returns 404 when the S3 object is missing despite a valid public record" do
     ArtifactStorage.client.stub_responses(:get_object, "NoSuchKey")
     get "/p/#{artifact.slug}"

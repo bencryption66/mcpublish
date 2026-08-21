@@ -27,7 +27,7 @@ class ContentController < ActionController::API
       return
     end
 
-    redirect_to "https://#{Rails.application.config.x.main_host}/artifacts/#{params[:slug]}/view",
+    redirect_to "https://#{Rails.application.config.x.main_host}/artifacts/#{ERB::Util.url_encode(params[:slug])}/view",
       allow_other_host: true
   end
 

@@ -12,9 +12,10 @@ class UsersController < WebController
       claim_pending_shares(@user)
     end
 
+    return_to = session[:return_to]
     reset_session
     session[:user_id] = @user.id
-    redirect_to account_path, notice: "Account created"
+    redirect_to (return_to || account_path), notice: "Account created"
   rescue ActiveRecord::RecordInvalid => e
     raise unless e.record.is_a?(User) && e.record == @user
 

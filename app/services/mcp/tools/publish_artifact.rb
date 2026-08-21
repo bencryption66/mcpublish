@@ -20,8 +20,15 @@ module Mcp
         unless Artifact::VISIBILITIES.include?(@visibility)
           raise ToolDispatcher::ToolError, "Invalid visibility: #{@visibility}"
         end
+        if @organization_slug && @visibility != "organisation"
+          raise ToolDispatcher::ToolError, "organization can only be set when visibility is organisation"
+        end
+        if @shared_with && @visibility != "shared"
+          raise ToolDispatcher::ToolError, "shared_with can only be set when visibility is shared"
+        end
 
         organization = @visibility == "organisation" ? OrganizationResolver.resolve(user: @user, slug: @organization_slug) : nil
+        SharedWithApplier.validate!(@shared_with) if @shared_with
 
         artifact = create_artifact_with_retry(organization)
 
@@ -32,7 +39,7 @@ module Mcp
           raise ToolDispatcher::ToolError, "Storage error, please retry: #{e.message}"
         end
 
-        if @visibility == "shared" && @shared_with.present?
+        if @shared_with.present?
           begin
             SharedWithApplier.apply(artifact: artifact, emails: @shared_with)
           rescue ToolDispatcher::ToolError

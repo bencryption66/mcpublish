@@ -20,6 +20,7 @@ class ContentAccessToken
     return nil if token.blank?
 
     payload = verifier.verify(token, purpose: :content_access)
+    return nil unless payload.is_a?(Hash) && payload["expires_at"].is_a?(Integer)
     return nil if payload["expires_at"] < Time.current.to_i
     return nil if payload["slug"] != slug
 

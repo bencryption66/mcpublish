@@ -42,7 +42,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_21_085412) do
     t.integer "byte_size", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id"
+    t.bigint "user_id", null: false
     t.string "visibility", default: "private", null: false
     t.bigint "organization_id"
     t.index ["organization_id"], name: "index_artifacts_on_organization_id"
