@@ -38,6 +38,11 @@ gem "thruster", require: false
 # gem "rack-cors"
 
 group :development, :test do
+  # Loads .env for local dev secrets (Tigris/S3 credentials, etc.) — the
+  # plain "dotenv" gem above is only Kamal's own dependency and isn't
+  # wired into Rails' boot process on its own.
+  gem "dotenv-rails"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
