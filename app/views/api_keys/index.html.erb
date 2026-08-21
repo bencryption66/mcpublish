@@ -1,20 +1,28 @@
-<h1>API keys</h1>
+<div class="page-head">
+  <h1>API keys</h1>
+</div>
 
-<ul>
-  <% @api_keys.each do |api_key| %>
-    <li>
-      <%= api_key.label %>
-      <% if api_key.revoked? %>
-        (revoked)
-      <% else %>
-        <%= button_to "Revoke", api_key_path(api_key), method: :delete %>
-      <% end %>
-    </li>
+<div class="card">
+  <ul class="row-list">
+    <% @api_keys.each do |api_key| %>
+      <li class="row-item">
+        <span><%= api_key.label %><% if api_key.revoked? %> <span class="muted">(revoked)</span><% end %></span>
+        <% unless api_key.revoked? %>
+          <span class="row-actions">
+            <%= button_to "Revoke", api_key_path(api_key), method: :delete, class: "linklike" %>
+          </span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+<div class="card">
+  <%= form_with url: api_keys_path, local: true, class: "inline-form" do |f| %>
+    <div class="form-field">
+      <%= f.label :label, "New key label" %>
+      <%= f.text_field :label %>
+    </div>
+    <%= f.submit "Generate key", class: "btn btn-primary" %>
   <% end %>
-</ul>
-
-<%= form_with url: api_keys_path, local: true do |f| %>
-  <%= f.label :label, "New key label" %>
-  <%= f.text_field :label %>
-  <%= f.submit "Generate key" %>
-<% end %>
+</div>

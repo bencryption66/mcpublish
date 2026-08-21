@@ -1,16 +1,26 @@
-<h1><%= @organization.name %></h1>
+<div class="page-head">
+  <h1><%= @organization.name %></h1>
+</div>
 
-<ul>
-  <% @memberships.each do |membership| %>
-    <li>
-      <%= membership.user.email %> (<%= membership.role %>)
-      <%= button_to "Remove", remove_member_organization_path(@organization, membership_id: membership.id), method: :delete %>
-    </li>
+<div class="card">
+  <ul class="row-list">
+    <% @memberships.each do |membership| %>
+      <li class="row-item">
+        <span><%= membership.user.email %> <span class="muted">(<%= membership.role %>)</span></span>
+        <span class="row-actions">
+          <%= button_to "Remove", remove_member_organization_path(@organization, membership_id: membership.id), method: :delete, class: "linklike" %>
+        </span>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+<div class="card">
+  <%= form_with url: invite_organization_path(@organization), method: :post, local: true, class: "inline-form" do |f| %>
+    <div class="form-field">
+      <%= f.label :email, "Invite by email" %>
+      <%= f.email_field :email %>
+    </div>
+    <%= f.submit "Invite", class: "btn btn-primary" %>
   <% end %>
-</ul>
-
-<%= form_with url: invite_organization_path(@organization), method: :post, local: true do |f| %>
-  <%= f.label :email, "Invite by email" %>
-  <%= f.email_field :email %>
-  <%= f.submit "Invite" %>
-<% end %>
+</div>

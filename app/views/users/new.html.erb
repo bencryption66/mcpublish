@@ -1,25 +1,32 @@
-<h1>Sign up</h1>
+<div class="card auth-card">
+  <h1>Start McPublishing</h1>
+  <p class="muted">Free while we&rsquo;re in beta.</p>
 
-<% if @user.errors.any? %>
-  <ul role="alert">
-    <% @user.errors.full_messages.each do |message| %>
-      <li><%= message %></li>
-    <% end %>
-  </ul>
-<% end %>
+  <% if @user.errors.any? %>
+    <ul role="alert" class="error-list">
+      <% @user.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  <% end %>
 
-<%= form_with model: @user, url: signup_path, local: true do |f| %>
-  <div>
-    <%= f.label :email %>
-    <%= f.email_field :email %>
-  </div>
-  <div>
-    <%= f.label :password %>
-    <%= f.password_field :password %>
-  </div>
-  <div>
-    <%= f.label :password_confirmation %>
-    <%= f.password_field :password_confirmation %>
-  </div>
-  <%= f.submit "Sign up" %>
-<% end %>
+  <%= form_with model: @user, url: signup_path, local: true do |f| %>
+    <div class="form-field">
+      <%= f.label :email %>
+      <%= f.email_field :email %>
+    </div>
+    <div class="form-field">
+      <%= f.label :password %>
+      <%= f.password_field :password %>
+    </div>
+    <div class="form-field">
+      <%= f.label :password_confirmation %>
+      <%= f.password_field :password_confirmation %>
+    </div>
+    <div class="form-actions">
+      <%= f.submit "Sign up", class: "btn btn-primary", style: "width:100%" %>
+    </div>
+  <% end %>
+
+  <p class="muted">Already have an account? <%= link_to "Log in", login_path %></p>
+</div>

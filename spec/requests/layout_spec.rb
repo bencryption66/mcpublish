@@ -33,4 +33,17 @@ RSpec.describe "Shared web layout", type: :request do
     expect(response.body).to include("site-footer")
     expect(response.body).to include("things may occasionally wobble")
   end
+
+  it "renders the signup page as an auth card with the verb heading" do
+    get "/signup"
+
+    expect(response.body).to include("Start McPublishing")
+    expect(response.body).to include("auth-card")
+  end
+
+  it "renders the login page as an auth card" do
+    get "/login"
+
+    expect(response.body).to include("auth-card")
+  end
 end

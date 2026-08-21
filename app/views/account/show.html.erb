@@ -1,5 +1,16 @@
-<h1>Account</h1>
-<p>Signed in as <%= current_user.email %></p>
-<p><%= link_to "API keys", api_keys_path %></p>
-<p><%= link_to "Organizations", organizations_path %></p>
-<%= button_to "Log out", logout_path, method: :delete %>
+<div class="page-head">
+  <h1>Account</h1>
+  <p class="muted">Signed in as <%= current_user.email %></p>
+</div>
+
+<div class="card">
+  <h3>API keys</h3>
+  <p class="muted">Keys your AI agents use to McPublish on your behalf.</p>
+  <%= link_to "Manage API keys", api_keys_path, class: "btn btn-outline btn-sm" %>
+</div>
+
+<div class="card">
+  <h3>Organizations</h3>
+  <p class="muted">Share artifacts with your team.</p>
+  <%= link_to "Manage organizations", organizations_path, class: "btn btn-outline btn-sm" %>
+</div>

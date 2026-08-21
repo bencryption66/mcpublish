@@ -1,9 +1,13 @@
-<h1>Your organizations</h1>
+<div class="page-head">
+  <h1>Your organizations</h1>
+</div>
 
-<ul>
-  <% @organizations.each do |org| %>
-    <li><%= link_to org.name, organization_path(org) %></li>
-  <% end %>
-</ul>
+<div class="card">
+  <ul class="row-list">
+    <% @organizations.each do |org| %>
+      <li class="row-item"><%= link_to org.name, organization_path(org) %></li>
+    <% end %>
+  </ul>
+</div>
 
-<%= link_to "New organization", new_organization_path %>
+<%= link_to "New organization", new_organization_path, class: "btn btn-primary" %>
