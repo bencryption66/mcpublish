@@ -22,4 +22,12 @@ RSpec.describe Organization, type: :model do
     org = Organization.new(name: "Acme", slug: "acme-co")
     expect(org).to be_valid
   end
+
+  it "is accessible via organization#artifacts" do
+    org = Organization.create!(name: "Acme", slug: "acme")
+    user = User.create!(email: "alice@example.com", password: "password123", password_confirmation: "password123")
+    artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 10, visibility: "organisation", organization: org)
+
+    expect(org.artifacts).to include(artifact)
+  end
 end

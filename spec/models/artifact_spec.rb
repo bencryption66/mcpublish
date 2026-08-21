@@ -37,4 +37,31 @@ RSpec.describe Artifact, type: :model do
     artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 10)
     expect(user.artifacts).to include(artifact)
   end
+
+  it "defaults to private visibility" do
+    artifact = Artifact.create!(user: user, storage_key: "artifacts/1", byte_size: 10)
+    expect(artifact.visibility).to eq("private")
+  end
+
+  it "rejects an invalid visibility value" do
+    artifact = Artifact.new(user: user, storage_key: "artifacts/1", byte_size: 10, visibility: "bogus")
+    expect(artifact).not_to be_valid
+  end
+
+  it "requires an organization when visibility is organisation" do
+    artifact = Artifact.new(user: user, storage_key: "artifacts/1", byte_size: 10, visibility: "organisation")
+    expect(artifact).not_to be_valid
+  end
+
+  it "accepts an organisation-visibility artifact with an organization set" do
+    org = Organization.create!(name: "Acme", slug: "acme")
+    artifact = Artifact.new(user: user, storage_key: "artifacts/1", byte_size: 10, visibility: "organisation", organization: org)
+    expect(artifact).to be_valid
+  end
+
+  it "rejects an organization set on a non-organisation-visibility artifact" do
+    org = Organization.create!(name: "Acme", slug: "acme")
+    artifact = Artifact.new(user: user, storage_key: "artifacts/1", byte_size: 10, visibility: "private", organization: org)
+    expect(artifact).not_to be_valid
+  end
 end
