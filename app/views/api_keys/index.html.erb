@@ -9,8 +9,9 @@
     <h3>Your new API key</h3>
     <p class="muted">Copy it now &mdash; it will not be shown again.</p>
     <pre class="snippet"><%= flash[:new_api_key] %></pre>
-    <p class="muted">Connect it to Claude Code in one command:</p>
-    <pre class="snippet">claude mcp add --transport http mcpublish <%= mcp_url %> --header "Authorization: Bearer <%= flash[:new_api_key] %>"</pre>
+    <p class="muted">Connect it in one command &mdash; run this in your terminal (requires <a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a>; works on macOS, Windows, and Linux):</p>
+    <pre class="snippet">claude mcp add --transport http --scope user mcpublish <%= mcp_url %> --header "Authorization: Bearer <%= flash[:new_api_key] %>"</pre>
+    <p class="muted">Then open Claude Code and say <em>&ldquo;McPublish a page that&hellip;&rdquo;</em></p>
   </div>
 <% end %>
 
@@ -41,7 +42,8 @@
 
 <div class="card">
   <h3>Connect your AI</h3>
-  <p class="muted">Add McPublish to Claude Code with your API key:</p>
-  <pre class="snippet">claude mcp add --transport http mcpublish <%= mcp_url %> --header "Authorization: Bearer YOUR_API_KEY"</pre>
-  <p class="muted">Then just tell your agent to McPublish something.</p>
+  <p class="muted">Run this in your terminal, replacing <code>YOUR_API_KEY</code> with a key from above (requires <a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a>; works on macOS, Windows, and Linux):</p>
+  <pre class="snippet">claude mcp add --transport http --scope user mcpublish <%= mcp_url %> --header "Authorization: Bearer YOUR_API_KEY"</pre>
+  <p class="muted">Then open Claude Code and say <em>&ldquo;McPublish a page that&hellip;&rdquo;</em></p>
+  <p class="muted">Using another AI tool? Any MCP client that supports HTTP transport with an <code>Authorization</code> header can connect &mdash; the endpoint is <code><%= mcp_url %></code>.</p>
 </div>

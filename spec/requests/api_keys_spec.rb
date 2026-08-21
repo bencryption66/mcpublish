@@ -31,7 +31,7 @@ RSpec.describe "API key management", type: :request do
     follow_redirect!
 
     expect(response.body).to match(/mcpub_[0-9a-f]{64}/)
-    expect(response.body).to include("claude mcp add --transport http mcpublish https://mcpublish.ai/mcp")
+    expect(response.body).to include("claude mcp add --transport http --scope user mcpublish https://mcpublish.ai/mcp")
     expect(response.body).to match(%r{Authorization: Bearer mcpub_[0-9a-f]{64}})
 
     get "/api_keys"
@@ -42,7 +42,7 @@ RSpec.describe "API key management", type: :request do
     sign_in_as(user)
     get "/api_keys"
 
-    expect(response.body).to include("claude mcp add --transport http mcpublish https://mcpublish.ai/mcp")
+    expect(response.body).to include("claude mcp add --transport http --scope user mcpublish https://mcpublish.ai/mcp")
     expect(response.body).to include("YOUR_API_KEY")
   end
 
