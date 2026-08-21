@@ -1,4 +1,5 @@
 class Artifact < ApplicationRecord
+  has_many :artifact_shares, dependent: :destroy
   belongs_to :user
   belongs_to :organization, optional: true
 

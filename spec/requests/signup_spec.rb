@@ -38,4 +38,15 @@ RSpec.describe "Signup", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
     expect(User.exists?(email: "broken@example.com")).to eq(false)
   end
+
+  it "claims any pending artifact shares matching the new user's email" do
+    owner = User.create!(email: "owner@example.com", password: "password123", password_confirmation: "password123")
+    artifact = Artifact.create!(user: owner, storage_key: "artifacts/1", byte_size: 5, visibility: "shared")
+    ArtifactShare.create!(artifact: artifact, email: "invitee@example.com")
+
+    post "/signup", params: { user: { email: "invitee@example.com", password: "password123", password_confirmation: "password123" } }
+
+    new_user = User.find_by!(email: "invitee@example.com")
+    expect(ArtifactShare.find_by(artifact: artifact).user).to eq(new_user)
+  end
 end

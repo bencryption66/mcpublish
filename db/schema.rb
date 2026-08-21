@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_21_085027) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_21_085412) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,6 +23,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_21_085027) do
     t.bigint "user_id"
     t.index ["token_digest"], name: "index_api_keys_on_token_digest", unique: true
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "artifact_shares", force: :cascade do |t|
+    t.bigint "artifact_id", null: false
+    t.string "email", null: false
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["artifact_id", "email"], name: "index_artifact_shares_on_artifact_id_and_email", unique: true
+    t.index ["artifact_id"], name: "index_artifact_shares_on_artifact_id"
+    t.index ["user_id"], name: "index_artifact_shares_on_user_id"
   end
 
   create_table "artifacts", force: :cascade do |t|
@@ -76,6 +87,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_21_085027) do
   end
 
   add_foreign_key "api_keys", "users"
+  add_foreign_key "artifact_shares", "artifacts"
+  add_foreign_key "artifact_shares", "users"
   add_foreign_key "artifacts", "organizations"
   add_foreign_key "artifacts", "users"
   add_foreign_key "organization_invites", "organizations"

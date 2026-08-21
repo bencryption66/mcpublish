@@ -9,6 +9,7 @@ class UsersController < WebController
     ActiveRecord::Base.transaction do
       @user.save!
       claim_pending_invites(@user)
+      claim_pending_shares(@user)
     end
 
     reset_session
@@ -30,6 +31,12 @@ class UsersController < WebController
     OrganizationInvite.where(email: user.email).find_each do |invite|
       OrganizationMembership.create!(user: user, organization: invite.organization, role: "member")
       invite.destroy!
+    end
+  end
+
+  def claim_pending_shares(user)
+    ArtifactShare.where(email: user.email, user_id: nil).find_each do |share|
+      share.update!(user: user)
     end
   end
 end
