@@ -243,6 +243,20 @@ RSpec.describe "MCP tools/call", type: :request do
       expect(Artifact.find_by(slug: slug).organization.slug).to eq("globex")
     end
 
+    it "does not re-check organization membership on an unrelated html-only update" do
+      org = Organization.create!(name: "Acme", slug: "acme")
+      membership = OrganizationMembership.create!(user: user, organization: org, role: "admin")
+      publish_result = call_tool("publish_artifact", { html: "<html>v1</html>", visibility: "organisation", organization: "acme" })
+      slug = publish_result["result"]["slug"]
+
+      membership.destroy!
+
+      result = call_tool("update_artifact", { slug: slug, html: "<html>v2</html>" })
+
+      expect(result["result"]["isError"]).to be_nil
+      expect(Artifact.find_by(slug: slug).byte_size).to eq("<html>v2</html>".bytesize)
+    end
+
     it "rejects an organization param when the effective visibility is not organisation" do
       publish_result = call_tool("publish_artifact", { html: "<html>v1</html>" })
       slug = publish_result["result"]["slug"]

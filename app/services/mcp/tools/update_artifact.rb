@@ -35,7 +35,7 @@ module Mcp
         end
 
         organization =
-          if effective_visibility == "organisation"
+          if (@visibility || @organization_slug) && effective_visibility == "organisation"
             OrganizationResolver.resolve(user: @user, slug: @organization_slug || artifact.organization&.slug)
           end
         SharedWithApplier.validate!(@shared_with) if @shared_with
