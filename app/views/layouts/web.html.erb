@@ -10,11 +10,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/site.css?v=1">
+    <link rel="stylesheet" href="/assets/site.css?v=2">
   </head>
   <body>
     <%= render "shared/nav" %>
     <% flash.each do |type, message| %>
+      <% next if type.to_s == "new_api_key" %><%# data for the API keys page, not a banner %>
       <p role="alert" class="flash <%= type.to_s == "alert" ? "flash-alert" : "flash-notice" %>"><%= message %></p>
     <% end %>
     <main class="container">

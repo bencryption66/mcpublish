@@ -122,6 +122,20 @@ main.container { padding-top: 32px; padding-bottom: 56px; min-height: 55vh; }
 .ex-caption span { color: var(--muted); }
 
 /* app pages */
+.snippet {
+  background: var(--ink);
+  color: var(--cream);
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 8px 0 14px;
+}
+.card-highlight { border: 1.5px solid var(--persimmon); }
+
 .page-head { margin-bottom: 20px; }
 .card {
   background: var(--card);

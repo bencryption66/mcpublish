@@ -1,6 +1,18 @@
+<% mcp_url = "https://#{Rails.application.config.x.main_host}/mcp" %>
+
 <div class="page-head">
   <h1>API keys</h1>
 </div>
+
+<% if flash[:new_api_key] %>
+  <div class="card card-highlight">
+    <h3>Your new API key</h3>
+    <p class="muted">Copy it now &mdash; it will not be shown again.</p>
+    <pre class="snippet"><%= flash[:new_api_key] %></pre>
+    <p class="muted">Connect it to Claude Code in one command:</p>
+    <pre class="snippet">claude mcp add --transport http mcpublish <%= mcp_url %> --header "Authorization: Bearer <%= flash[:new_api_key] %>"</pre>
+  </div>
+<% end %>
 
 <div class="card">
   <ul class="row-list">
@@ -25,4 +37,11 @@
     </div>
     <%= f.submit "Generate key", class: "btn btn-primary" %>
   <% end %>
+</div>
+
+<div class="card">
+  <h3>Connect your AI</h3>
+  <p class="muted">Add McPublish to Claude Code with your API key:</p>
+  <pre class="snippet">claude mcp add --transport http mcpublish <%= mcp_url %> --header "Authorization: Bearer YOUR_API_KEY"</pre>
+  <p class="muted">Then just tell your agent to McPublish something.</p>
 </div>

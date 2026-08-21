@@ -7,7 +7,8 @@ class ApiKeysController < WebController
 
   def create
     _api_key, raw_token = ApiKey.issue!(label: params[:label], user: current_user)
-    redirect_to api_keys_path, notice: "New API key (copy it now, it will not be shown again): #{raw_token}"
+    flash[:new_api_key] = raw_token
+    redirect_to api_keys_path, notice: "API key created — copy it below, it will not be shown again."
   end
 
   def destroy

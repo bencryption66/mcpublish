@@ -7,7 +7,7 @@ RSpec.describe "Shared web layout", type: :request do
     expect(response.body).to include("site-nav")
     expect(response.body).to include("logo-lockup")
     expect(response.body).to include("beta-pill")
-    expect(response.body).to include("/assets/site.css?v=1")
+    expect(response.body).to match(%r{/assets/site\.css\?v=\d+})
     expect(response.body).to include("/icon.svg")
   end
 
