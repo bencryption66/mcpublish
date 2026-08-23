@@ -54,7 +54,20 @@ Artifacts are AI-generated HTML containing any CSS, including rules like `div { 
 - Because fixed elements reserve no space, the style block also sets `html { padding-top: 44px !important }`. Accepted tradeoff: an artifact built to exactly `100vh` gains 44px of scroll — preferable to covering its content.
 - A `max-width: 640px` media query hides the middle sentence, leaving logo + CTA.
 
-**Known limit:** a deliberately hostile artifact can still hide the banner with `#mcpublish-banner { display: none !important }`. Bulletproofing requires shadow DOM or an iframe wrapper; both cost more than they are worth for a growth banner. This is the same tradeoff comparable hosting products accept.
+**Known limits.** A deliberately hostile artifact can defeat the banner in two
+ways: an `!important` rule can hide it, and — because the banner is injected at
+the *start* of body, so artifact content follows it in DOM order — a plain
+`position:fixed;top:0;z-index:2147483647` element in the artifact wins the
+z-index tie on document order and can cover the real banner with a pixel-identical
+fake whose CTA points anywhere. The banner does not create that capability (an
+artifact could always fake McPublish branding on this host) but it raises the
+payoff. Separately and non-maliciously: an artifact with its own fixed top header
+will be overlapped by the banner, and an artifact that sets `transform`, `filter`,
+or `contain` on `html`/`body` creates a containing block for fixed descendants,
+which makes the banner scroll with the page. Defending against any of these needs
+shadow DOM or an iframe wrapper; all of them are the same downpayment on serving
+artifacts inside an iframe with the banner as parent chrome, which is the real
+long-term answer if the banner ever becomes growth-critical.
 
 ## 4. Testing
 

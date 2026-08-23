@@ -13,7 +13,7 @@ RSpec.describe "Content serving", type: :request do
     get "/p/#{artifact.slug}"
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("<html>hello</html>")
+    expect(response.body).to eq(ArtifactBanner.inject("<html>hello</html>"))
     expect(response.content_type).to include("text/html")
   end
 

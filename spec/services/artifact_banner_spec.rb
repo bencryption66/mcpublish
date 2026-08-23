@@ -48,8 +48,8 @@ RSpec.describe ArtifactBanner do
     it "links the brand to the main host and the CTA to signup" do
       result = described_class.inject("<html><body></body></html>")
 
-      expect(result).to include(%(href="https://mcpublish.ai" target="_blank" rel="noopener"))
-      expect(result).to include(%(href="https://mcpublish.ai/signup" target="_blank" rel="noopener"))
+      expect(result).to include(%(href="https://mcpublish.ai" target="_blank" rel="noopener noreferrer"))
+      expect(result).to include(%(href="https://mcpublish.ai/signup" target="_blank" rel="noopener noreferrer"))
     end
 
     it "builds links from the configured main host rather than a hardcoded domain" do
@@ -71,13 +71,36 @@ RSpec.describe ArtifactBanner do
       expect(result).to include("McPublish your own &rarr;")
     end
 
-    it "reserves space for the fixed banner and scopes every rule" do
+    it "reserves space for the fixed banner" do
       result = described_class.inject("<html><body></body></html>")
 
-      expect(result).to include("html{padding-top:44px !important}")
+      expect(result).to include("padding-top:44px !important")
       expect(result).to include("position:fixed !important")
       expect(result).to include("z-index:2147483647 !important")
       expect(result).to include("@media (max-width:640px)")
+    end
+
+    it "scopes every css rule to the banner or the html space reservation" do
+      css = described_class.inject("<html><body></body></html>")[%r{<style[^>]*>(.*?)</style>}m, 1]
+      selectors = css.scan(/(?:\A|[{}])\s*([^{}@]+?)\s*\{/).flatten
+
+      expect(selectors).not_to be_empty
+      selectors.each do |selector|
+        expect(selector.start_with?("#mcpublish-banner") || selector == "html").to be(true),
+          "unscoped selector in banner CSS: #{selector.inspect}"
+      end
+    end
+
+    it "hides the banner and releases the reserved space when printing" do
+      result = described_class.inject("<html><body></body></html>")
+
+      expect(result).to include("@media print{#mcpublish-banner{display:none !important}html{padding-top:0 !important}}")
+    end
+
+    it "offsets scroll anchors so in-page links do not land under the banner" do
+      result = described_class.inject("<html><body></body></html>")
+
+      expect(result).to include("scroll-padding-top:44px !important")
     end
 
     it "ships no javascript" do
@@ -99,12 +122,21 @@ RSpec.describe ArtifactBanner do
       expect(result.index("mcpublish-banner")).to be < result.index("<p>Real</p>")
     end
 
-    it "documents the known limitation: a body tag inside a comment wins" do
+    it "skips a body tag inside an HTML comment and uses the real one" do
       result = described_class.inject("<!-- <body> --><html><body><p>Real</p></body></html>")
 
-      # Regex matching cannot see comment boundaries; the banner lands in the
-      # comment and is not rendered. Accepted — see the class comment.
-      expect(result.index("mcpublish-banner")).to be < result.index("-->")
+      expect(result.index("mcpublish-banner")).to be > result.index("-->")
+      expect(result.index("mcpublish-banner")).to be < result.index("<p>Real</p>")
+    end
+
+    it "skips a body tag inside a script string literal and uses the real one" do
+      html = %(<html><head><script>const t='<html><body>x</body></html>';</script></head><body><p>Real</p></body></html>)
+
+      result = described_class.inject(html)
+
+      expect(result).to include(%(const t='<html><body>x</body></html>';))
+      expect(result.index("mcpublish-banner")).to be > result.index("</script>")
+      expect(result.index("mcpublish-banner")).to be < result.index("<p>Real</p>")
     end
   end
 end
