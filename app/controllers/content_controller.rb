@@ -38,7 +38,7 @@ class ContentController < ActionController::API
     return head :not_found unless html
 
     response.headers["Cache-Control"] = "no-store"
-    render plain: html, content_type: "text/html"
+    render plain: ArtifactBanner.inject(html), content_type: "text/html"
   end
 
   def session

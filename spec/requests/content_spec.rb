@@ -13,7 +13,7 @@ RSpec.describe "Content serving", type: :request do
     get "/p/#{artifact.slug}"
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to eq("<html>hello</html>")
+    expect(response.body).to include("<html>hello</html>")
     expect(response.content_type).to include("text/html")
   end
 
@@ -64,7 +64,7 @@ RSpec.describe "Content serving", type: :request do
     get "/p/#{private_artifact.slug}", params: { token: token }
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to eq("<html>hello</html>")
+    expect(response.body).to include("<html>hello</html>")
   end
 
   it "redirects instead of serving when the token is for a different slug" do
@@ -75,5 +75,35 @@ RSpec.describe "Content serving", type: :request do
     get "/p/#{private_artifact.slug}", params: { token: token }
 
     expect(response).to redirect_to("https://mcpublish.ai/artifacts/#{private_artifact.slug}/view")
+  end
+
+  it "injects the McPublish banner above a public artifact" do
+    get "/p/#{artifact.slug}"
+
+    expect(response.body).to include('<div id="mcpublish-banner"')
+    expect(response.body).to include("This page was <b>McPublished</b> straight from an AI chat.")
+    expect(response.body).to include(%(href="https://mcpublish.ai/signup"))
+  end
+
+  it "injects the banner on a token-served private artifact too" do
+    private_artifact = Artifact.create!(user: user, storage_key: "artifacts/2", byte_size: 5, visibility: "private")
+    token = ContentAccessToken.generate(artifact: private_artifact, user: user)
+
+    get "/p/#{private_artifact.slug}", params: { token: token }
+
+    expect(response.body).to include('<div id="mcpublish-banner"')
+  end
+
+  it "sets no Set-Cookie header on a banner-carrying response" do
+    get "/p/#{artifact.slug}"
+
+    expect(response.body).to include('<div id="mcpublish-banner"')
+    expect(response.headers["Set-Cookie"]).to be_nil
+  end
+
+  it "leaves the stored artifact untouched" do
+    expect {
+      get "/p/#{artifact.slug}"
+    }.not_to change { artifact.reload.byte_size }
   end
 end
