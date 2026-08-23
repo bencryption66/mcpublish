@@ -91,5 +91,20 @@ RSpec.describe ArtifactBanner do
       expect(described_class.inject("")).to eq("")
       expect(described_class.inject(nil)).to be_nil
     end
+
+    it "does not mistake a hyphenated custom element for the body tag" do
+      result = described_class.inject("<html><body-scroll-lock></body-scroll-lock><body><p>Real</p></body></html>")
+
+      expect(result.index("mcpublish-banner")).to be > result.index("</body-scroll-lock>")
+      expect(result.index("mcpublish-banner")).to be < result.index("<p>Real</p>")
+    end
+
+    it "documents the known limitation: a body tag inside a comment wins" do
+      result = described_class.inject("<!-- <body> --><html><body><p>Real</p></body></html>")
+
+      # Regex matching cannot see comment boundaries; the banner lands in the
+      # comment and is not rendered. Accepted — see the class comment.
+      expect(result.index("mcpublish-banner")).to be < result.index("-->")
+    end
   end
 end

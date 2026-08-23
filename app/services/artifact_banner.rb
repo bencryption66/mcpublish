@@ -10,8 +10,18 @@
 # declares. A deliberately hostile artifact can still hide the banner with
 # its own !important rule; defending against that needs shadow DOM or an
 # iframe wrapper, which costs more than it is worth for a promo banner.
+#
+# Known limitation: the body tag is found by regex, not by parsing, so an
+# artifact containing a literal <body> inside an HTML comment before its
+# real body tag gets the banner injected into that comment, where it is
+# never rendered. Accepted deliberately — parsing and reserializing
+# arbitrary AI-generated HTML would risk mangling the artifact itself,
+# which is a worse failure than a missing banner on a rare page.
 class ArtifactBanner
-  BODY_TAG = /<body\b[^>]*>/i
+  # (?=[\s>]) rather than \b: \b matches the word/hyphen boundary in
+  # <body-scroll-lock>, and custom elements are required to contain a
+  # hyphen, so \b would match a Web Component before the real body tag.
+  BODY_TAG = /<body(?=[\s>])[^>]*>/i
   DOCTYPE = /\A\s*<!doctype[^>]*>/i
 
   # position:fixed rather than sticky: sticky silently fails inside artifacts
