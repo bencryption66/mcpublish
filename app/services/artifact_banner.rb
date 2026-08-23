@@ -15,16 +15,23 @@
 # reserializing arbitrary AI-generated HTML would risk mangling the
 # artifact itself, which is a worse failure than a misplaced banner. A
 # <body> appearing inside a <script> string or an HTML comment is skipped
-# (see unsafe_context?), so the real body tag still wins. Remaining known
+# (see body_tag_end), so the real body tag still wins. Remaining known
 # gaps, all rare and non-destructive: a <body> inside a <template> renders
-# the banner inert, and an artifact whose own fixed header sits at the top
-# of the viewport will be overlapped by the banner.
+# the banner inert, an artifact whose own fixed header sits at the top
+# of the viewport will be overlapped by the banner, and an artifact that
+# sets transform, filter, or contain on html/body makes itself the
+# containing block for fixed descendants, which leaves the banner
+# scrolling with the page.
 class ArtifactBanner
   # (?=[\s>]) rather than \b: \b matches the word/hyphen boundary in
   # <body-scroll-lock>, and custom elements are required to contain a
   # hyphen, so \b would match a Web Component before the real body tag.
   BODY_TAG = /<body(?=[\s>])[^>]*>/i
   DOCTYPE = /\A\s*<!doctype[^>]*>/i
+
+  # One alternation so a single forward pass can consume comments and
+  # script bodies in the order they appear, rather than counting them.
+  SCAN = /<!--|<script\b|#{BODY_TAG.source}/i
 
   # position:fixed rather than sticky: sticky silently fails inside artifacts
   # that scroll an inner container instead of the body, which is common in
@@ -72,15 +79,9 @@ class ArtifactBanner
       return html if html.blank?
 
       markup = STYLE + banner_div
-      offset = 0
+      insert_at = body_tag_end(html)
 
-      while (match = BODY_TAG.match(html, offset))
-        unless unsafe_context?(html[0, match.begin(0)])
-          return html[0, match.end(0)] + markup + html[match.end(0)..]
-        end
-
-        offset = match.end(0)
-      end
+      return html[0, insert_at] + markup + html[insert_at..] if insert_at
 
       if (doctype = DOCTYPE.match(html))
         return doctype[0] + markup + doctype.post_match
@@ -91,13 +92,34 @@ class ArtifactBanner
 
     private
 
-    # True when everything before this point leaves an unclosed <script> or
-    # <!-- comment open — i.e. a <body> found here is text inside a script
-    # literal or a comment, not the document's real body tag. Injecting
-    # there would corrupt the script or silently swallow the banner.
-    def unsafe_context?(prefix)
-      prefix.scan(/<script\b/i).size > prefix.scan(%r{</script\b}i).size ||
-        prefix.scan("<!--").size > prefix.scan("-->").size
+    # Index just past the document's real <body …> tag, or nil if there is
+    # none. Single left-to-right pass: comments and script bodies are
+    # consumed whole as they are met, so a <body> written inside either is
+    # never mistaken for the document's own. Scanning forward only keeps
+    # this O(n) — counting occurrences in the prefix instead made a crafted
+    # artifact cost minutes of CPU on one request.
+    def body_tag_end(html)
+      pos = 0
+
+      while (match = SCAN.match(html, pos))
+        token = match[0]
+
+        if token == "<!--"
+          close = html.index("-->", match.end(0))
+          return nil unless close
+
+          pos = close + 3
+        elsif token.match?(/\A<script/i)
+          close = html.match(%r{</script\b}i, match.end(0))
+          return nil unless close
+
+          pos = close.end(0)
+        else
+          return match.end(0)
+        end
+      end
+
+      nil
     end
 
     # Built per call rather than frozen at load time so the host always

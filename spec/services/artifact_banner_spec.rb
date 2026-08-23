@@ -1,4 +1,5 @@
 require "rails_helper"
+require "benchmark"
 
 RSpec.describe ArtifactBanner do
   describe ".inject" do
@@ -85,7 +86,7 @@ RSpec.describe ArtifactBanner do
       selectors = css.scan(/(?:\A|[{}])\s*([^{}@]+?)\s*\{/).flatten
 
       expect(selectors).not_to be_empty
-      selectors.each do |selector|
+      selectors.flat_map { |group| group.split(",") }.map(&:strip).each do |selector|
         expect(selector.start_with?("#mcpublish-banner") || selector == "html").to be(true),
           "unscoped selector in banner CSS: #{selector.inspect}"
       end
@@ -137,6 +138,31 @@ RSpec.describe ArtifactBanner do
       expect(result).to include(%(const t='<html><body>x</body></html>';))
       expect(result.index("mcpublish-banner")).to be > result.index("</script>")
       expect(result.index("mcpublish-banner")).to be < result.index("<p>Real</p>")
+    end
+
+    it "stays linear on an artifact packed with body tags inside a script" do
+      payload = "<html><head><script>" + ("<body>" * 50_000) + "</script></head><body><p>Real</p></body></html>"
+
+      elapsed = Benchmark.realtime { described_class.inject(payload) }
+
+      expect(elapsed).to be < 1.0
+    end
+
+    it "is not fooled by a </script> appearing inside a comment" do
+      html = %(<!-- </script> --><html><head><script>var s="<body>";</script></head><body><p>Real</p></body></html>)
+
+      result = described_class.inject(html)
+
+      expect(result).to include(%(var s="<body>";))
+      expect(result.index("mcpublish-banner")).to be > result.rindex("</script>")
+      expect(result.index("mcpublish-banner")).to be < result.index("<p>Real</p>")
+    end
+
+    it "falls back to the doctype branch when a script is never closed" do
+      result = described_class.inject("<!DOCTYPE html><html><script>var s='<body>';")
+
+      expect(result).to start_with("<!DOCTYPE html>")
+      expect(result.index("mcpublish-banner")).to be < result.index("<script>")
     end
   end
 end
