@@ -101,9 +101,13 @@ RSpec.describe "Content serving", type: :request do
     expect(response.headers["Set-Cookie"]).to be_nil
   end
 
-  it "leaves the stored artifact untouched" do
-    expect {
-      get "/p/#{artifact.slug}"
-    }.not_to change { artifact.reload.byte_size }
+  it "never writes the injected banner back to storage" do
+    expect(ArtifactStorage).not_to receive(:put)
+    expect(ArtifactStorage).not_to receive(:delete)
+
+    get "/p/#{artifact.slug}"
+
+    expect(response.body).to include('<div id="mcpublish-banner"')
+    expect(artifact.reload.byte_size).to eq(20)
   end
 end
