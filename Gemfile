@@ -3,7 +3,7 @@ source "https://rubygems.org"
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.0.5", ">= 8.0.5.1"
 # Use postgresql as the database for Active Record
-gem "pg", "~> 1.1"
+gem "pg", "~> 1.7"
 gem "aws-sdk-s3"
 gem "rack-attack"
 # Use the Puma web server [https://github.com/puma/puma]
